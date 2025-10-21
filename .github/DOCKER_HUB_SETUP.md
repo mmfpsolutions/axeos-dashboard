@@ -23,12 +23,23 @@ This document explains how to configure GitHub Actions to automatically build an
 
 1. Go to your GitHub repository: `https://github.com/scottwalter/axeos-dashboard`
 2. Click on **Settings** (repository settings, not your account)
+   - ⚠️ **Important**: This is repository Settings, NOT your user/profile settings
+   - You must have admin access to the repository to see this
 3. In the left sidebar, expand **Secrets and variables** → click **Actions**
-4. Click **New repository secret**
-5. Enter the following:
-   - **Name**: `DOCKER_HUB_TOKEN`
+4. Click **New repository secret** (green button)
+5. Enter the following **EXACTLY**:
+   - **Name**: `DOCKER_HUB_TOKEN` (case-sensitive, must be exact)
    - **Secret**: Paste the Docker Hub access token you copied in Step 1
 6. Click **Add secret**
+7. Verify the secret appears in the list as `DOCKER_HUB_TOKEN`
+
+### Verification Checklist
+
+After adding the secret, verify:
+- ✅ Secret name is exactly `DOCKER_HUB_TOKEN` (all caps, underscores, no spaces)
+- ✅ Secret is added to the **repository** (not organization or environment)
+- ✅ Secret appears in the "Actions secrets" list
+- ✅ You have admin/write access to the repository
 
 ## Step 3: Verify the Workflow
 
@@ -89,11 +100,34 @@ Docker will automatically pull the correct architecture for your platform.
 
 ## Troubleshooting
 
+### Workflow Fails with "Password required" or "ERROR: DOCKER_HUB_TOKEN secret is not set!"
+
+This means the GitHub secret is not configured correctly:
+
+1. **Verify the secret exists:**
+   - Go to repository Settings → Secrets and variables → Actions
+   - Confirm `DOCKER_HUB_TOKEN` appears in the list
+   - Secret name must be EXACTLY `DOCKER_HUB_TOKEN` (case-sensitive)
+
+2. **Check you're in the right repository:**
+   - URL should be `https://github.com/scottwalter/axeos-dashboard/settings/secrets/actions`
+   - NOT your user settings or another repository
+
+3. **Regenerate and re-add the secret:**
+   - Delete the existing secret from GitHub
+   - Create a new Docker Hub access token
+   - Add it again as `DOCKER_HUB_TOKEN`
+
+4. **Verify repository permissions:**
+   - You need admin access to the repository
+   - Fork/cloned repos need their own secrets
+
 ### Workflow Fails with "unauthorized: authentication required"
 
-- Verify the `DOCKER_HUB_TOKEN` secret is set correctly
+- Verify the `DOCKER_HUB_TOKEN` secret value is correct
 - Regenerate the Docker Hub access token and update the secret
 - Ensure the token has **Read & Write** permissions
+- Check that Docker Hub username is `scottwalter` (not your GitHub username if different)
 
 ### Workflow Fails During Build
 
