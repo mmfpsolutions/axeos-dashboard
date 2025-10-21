@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/scottwalter/axeos-dashboard/internal/auth"
 	"github.com/scottwalter/axeos-dashboard/internal/config"
@@ -88,7 +89,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		}
 
 		fmt.Printf("%s - %s - Request made to: %s\n",
-			http.TimeFormat,
+			time.Now().Format(http.TimeFormat),
 			clientIP,
 			r.URL.String())
 
