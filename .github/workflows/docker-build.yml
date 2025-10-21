@@ -70,5 +70,17 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
 
-      - name: Image digest
-        run: echo ${{ steps.meta.outputs.tags }}
+      - name: Build Summary
+        run: |
+          echo "✅ Successfully built and pushed multi-arch Docker images!"
+          echo ""
+          echo "📦 Images available at:"
+          echo "   https://hub.docker.com/r/scottwalter/axeos-dashboard"
+          echo ""
+          echo "🏷️  Tags:"
+          echo "   - scottwalter/axeos-dashboard:latest"
+          echo "   - scottwalter/axeos-dashboard:main"
+          echo ""
+          echo "💻 Pull and run:"
+          echo "   docker pull scottwalter/axeos-dashboard:latest"
+          echo "   docker run -d -p 3000:3000 -v ./config:/app/config scottwalter/axeos-dashboard:latest"
