@@ -1,0 +1,19 @@
+.git
+.gitignore
+README.md
+*.md
+.env
+# Config files are NOT excluded - they WILL be baked into the image
+# This allows running without volume mounts
+# Volume mounts will still override if provided
+.vscode
+.idea
+*.log
+docker-run.sh
+docker-build-personal.sh
+Dockerfile.personal
+DOCKER.md
+TROUBLESHOOTING.md
+CONVERSION_NOTES.md
+QUICKSTART.md
+axeos-dashboard

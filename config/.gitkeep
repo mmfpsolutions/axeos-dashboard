@@ -1,0 +1,7 @@
+# This directory should contain your configuration files:
+# - config.json
+# - access.json
+# - jsonWebTokenKey.json
+# - rpcConfig.json (optional)
+
+# See config.example.json for an example configuration

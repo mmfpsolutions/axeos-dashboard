@@ -1,0 +1,276 @@
+/**
+ * Statistics Modal Styles
+ * Dedicated CSS for the real-time statistics modal component
+ */
+
+/* Statistics Modal Specific Styles */
+#statistics-modal {
+    z-index: 1001; /* Higher than other modals */
+}
+
+#statistics-modal .modal-content {
+    max-width: 95vw;
+    max-height: 85vh;
+    width: 1200px;
+    height: 600px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Statistics Modal Header */
+.statistics-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px 15px 25px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--card-background);
+    border-radius: 8px 8px 0 0;
+}
+
+.statistics-modal-header h2 {
+    margin: 0;
+    font-size: 1.4em;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.statistics-modal-header .close-button {
+    background: none;
+    border: none;
+    font-size: 1.8em;
+    color: var(--text-color-secondary);
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.statistics-modal-header .close-button:hover {
+    background-color: var(--hover-background);
+    color: var(--text-color);
+}
+
+/* Statistics Modal Body */
+.statistics-modal-body {
+    flex: 1;
+    padding: 20px 25px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #1a1a1a;
+}
+
+/* Status Info Section */
+.stats-status-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.9em;
+}
+
+.stats-status-left {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.stats-status-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stats-status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success-color);
+    animation: pulse 2s infinite;
+}
+
+.stats-status-indicator.error {
+    background: var(--error-color);
+    animation: none;
+}
+
+.stats-last-update {
+    color: var(--text-color-secondary);
+    font-size: 0.85em;
+}
+
+/* Chart Container */
+.stats-chart-container {
+    flex: 1;
+    position: relative;
+    background: #0d0d0d;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 15px;
+    min-height: 400px;
+    overflow: hidden;
+}
+
+.stats-chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.stats-chart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Loading State */
+.stats-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-color-secondary);
+    font-size: 1.1em;
+}
+
+.stats-loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--border-color);
+    border-top: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+/* Error State */
+.stats-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--error-color);
+    font-size: 1em;
+    text-align: center;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stats-error-icon {
+    font-size: 2em;
+    opacity: 0.7;
+}
+
+/* Chart Legend (custom positioning) */
+.stats-chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #1a1a1a;
+    border-radius: 4px;
+}
+
+.stats-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+    color: var(--text-color);
+}
+
+.stats-legend-color {
+    width: 16px;
+    height: 3px;
+    border-radius: 2px;
+}
+
+.stats-legend-color.hashrate {
+    background: #FF1744;
+}
+
+.stats-legend-color.temperature {
+    background: #f5f5f5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #statistics-modal .modal-content {
+        width: 95vw;
+        height: 80vh;
+        max-width: 95vw;
+    }
+    
+    .statistics-modal-header {
+        padding: 15px 20px 10px 20px;
+    }
+    
+    .statistics-modal-header h2 {
+        font-size: 1.2em;
+    }
+    
+    .statistics-modal-body {
+        padding: 15px 20px;
+    }
+    
+    .stats-status-left {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .stats-chart-legend {
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .stats-legend-color.temperature {
+    background: #e0e0e0;
+}
+
+/* Clickable instance names in summary */
+.clickable-instance-name {
+    color: inherit; /* Use the original text color */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none; /* Remove underline completely */
+}
+
+.clickable-instance-name:hover {
+    color: #FF1744;
+    text-decoration: underline;
+}
+
+/* Smooth transitions */
+.stats-chart-container,
+.stats-status-info {
+    transition: all 0.2s ease;
+}
+
+.stats-chart-container:hover {
+    border-color: var(--primary-color);
+}

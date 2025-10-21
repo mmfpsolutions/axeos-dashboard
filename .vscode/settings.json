@@ -1,0 +1,10 @@
+{
+  // Docker extension settings for AxeOS Dashboard
+  // These ensure the container runs correctly when using VSCode's Docker extension
+
+  "docker.commands.run": "-p 3000:3000 -v ${workspaceFolder}/config:/app/config",
+  "docker.commands.runInteractive": "-p 3000:3000 -v ${workspaceFolder}/config:/app/config",
+
+  // Show container logs by default when starting
+  "docker.containers.showLogsOnStart": true
+}

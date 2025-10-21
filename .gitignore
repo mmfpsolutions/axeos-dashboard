@@ -1,0 +1,46 @@
+# Binaries
+axeos-dashboard
+axeos-dashboard-*
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# Configuration files (sensitive)
+config/*.json
+!config/.gitkeep
+
+# IDE
+# .vscode/ - Keep this for Docker extension configuration
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# Build artifacts
+dist/
+build/

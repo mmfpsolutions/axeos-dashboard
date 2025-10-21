@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build and Run AxeOS Dashboard",
+      "type": "shell",
+      "command": "docker build -t axeos-dashboard:latest . && docker stop axeos-dashboard 2>/dev/null || true && docker rm axeos-dashboard 2>/dev/null || true && docker run -d --name axeos-dashboard -p 3000:3000 axeos-dashboard:latest",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Run AxeOS Dashboard",
+      "type": "shell",
+      "command": "docker stop axeos-dashboard 2>/dev/null || true && docker rm axeos-dashboard 2>/dev/null || true && docker run -d --name axeos-dashboard -p 3000:3000 axeos-dashboard:latest",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Stop AxeOS Dashboard",
+      "type": "shell",
+      "command": "docker stop axeos-dashboard && docker rm axeos-dashboard",
+      "problemMatcher": []
+    },
+    {
+      "label": "View AxeOS Dashboard Logs",
+      "type": "shell",
+      "command": "docker logs -f axeos-dashboard",
+      "problemMatcher": [],
+      "isBackground": true
+    }
+  ]
+}

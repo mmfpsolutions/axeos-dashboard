@@ -1,0 +1,65 @@
+# Personal Build Dockerfile
+# This version includes your config files IN the image
+# Use this when you want to run without volume mounts
+# Volume mounts will still override if provided
+
+# Build stage
+FROM golang:1.23-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache git
+
+# Set working directory
+WORKDIR /build
+
+# Copy go mod files
+COPY go.mod go.sum* ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o axeos-dashboard ./cmd/server
+
+# Final stage
+FROM alpine:latest
+
+# Install ca-certificates for HTTPS requests
+RUN apk --no-cache add ca-certificates tzdata
+
+# Create app user
+RUN addgroup -g 1000 app && \
+    adduser -D -u 1000 -G app app
+
+# Set working directory
+WORKDIR /app
+
+# Copy binary from builder
+COPY --from=builder /build/axeos-dashboard .
+
+# Copy public files
+COPY --chown=app:app public ./public
+
+# Create config directory and copy config files into the image
+# These can still be overridden by volume mounts
+RUN mkdir -p /app/config && chown app:app /app/config
+COPY --chown=app:app config/*.json /app/config/
+
+# Switch to app user
+USER app
+
+# Expose port
+EXPOSE 3000
+
+# Set environment
+ENV PORT=3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+
+# Run the application
+CMD ["./axeos-dashboard"]

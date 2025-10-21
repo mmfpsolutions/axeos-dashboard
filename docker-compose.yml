@@ -1,0 +1,41 @@
+services:
+  axeos-dashboard:
+    # Use the image built from Dockerfile
+    image: axeos-dashboard:latest
+
+    # Build configuration (when using docker-compose build)
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: axeos-dashboard
+
+    # Port mapping (required for macOS/Windows)
+    # Maps host port 3000 to container port 3000
+    ports:
+      - "3000:3000"
+
+    # Volume mounts for persistent config
+    # This allows config changes to persist across container restarts/rebuilds
+    volumes:
+      - ./config:/app/config
+
+    # Environment variables (optional)
+    # environment:
+    #   - PORT=3000
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Health check - use public static file to avoid auth redirects in logs
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/public/css/bootstrap.min.css"]
+      interval: 30s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+
+    # Labels for documentation
+    labels:
+      com.axeos.description: "AxeOS Dashboard - Bitaxe Mining Monitor"
+      com.axeos.version: "1.0"

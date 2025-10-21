@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Time Setup - <!-- TITLE --></title>
+    <link rel="stylesheet" href="/public/css/bitaxeDashboard.min.css">
+    <link rel="stylesheet" href="/public/css/bootstrap.min.css">
+    <link rel="icon" href="/public/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <header>
+        <h1><!-- TITLE --></h1>
+        <p>Version: <!-- VERSION --></p>
+    </header>
+
+    <div class="main-container">
+        <main class="details-pane">
+            <div id="bootstrap-container">
+                <div class="bootstrap-header">
+                    <h2>Welcome to Bitaxe Dashboard</h2>
+                    <p>This appears to be your first time running the application. Please configure the initial settings below.</p>
+                    <p style="color: #ff1744;">!!!! If you are running Bitaxe-Dashboard via Docker make sure you have mapped the config folder to you local filesystem !!!!</p>
+                    <p style="color: #ff1744;">Docker Run Example:</p>
+                    <p style="color: #ff1744;"> sudo docker run -d --name bitaxe-dashboard -p 3000:3000/tcp -v {/your/local/config_path}:/app/config scottwalter/bitaxe-dashboard:latest </p>
+                </div>
+
+                <form id="bootstrapForm" class="bootstrap-form">
+                    <!-- Basic Settings -->
+                    <div class="form-section">
+                        <h3>Basic Settings</h3>
+                        
+                        <div class="form-group">
+                            <label for="title">Dashboard Title</label>
+                            <input type="text" id="title" name="title" value="Bitaxe Dashboard" required>
+                            <small>The title that will appear at the top of your dashboard</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="port">Web Server Port</label>
+                            <input type="number" id="port" name="port" value="3000" min="1024" max="65523" required>
+                            <small>Port number for the web server (1024-65523)</small>
+                        </div>
+                    </div>
+
+                    <!-- Authentication Settings -->
+                    <div class="form-section">
+                        <h3>Authentication Settings</h3>
+                        
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="enableAuth" name="enableAuth" value="true">
+                                Enable Authentication
+                            </label>
+                            <small>Check to enable login (recommended for production use on the internet)</small>
+                            <small>Application must be running in HTTPS / SSL if enabled</small>
+                        </div>
+
+                        <div id="authFields" style="display: none;">
+                            <div class="form-group">
+                                <label for="username">Admin Username</label>
+                                <input type="text" id="username" name="username" value="admin">
+                                <small>Username for administrative access</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="password">Admin Password</label>
+                                <div class="password-input-group">
+                                    <input type="password" id="password" name="password">
+                                    <button type="button" class="password-toggle" data-target="password">👁️</button>
+                                </div>
+                                <small>Strong password recommended</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <div class="password-input-group">
+                                    <input type="password" id="confirmPassword" name="confirmPassword">
+                                    <button type="button" class="password-toggle" data-target="confirmPassword">👁️</button>
+                                </div>
+                                <div id="passwordMatch" class="validation-message" style="display: none;"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="jwt-input-group">
+                                    <label for="jwtKey">JWT Secret Key</label>
+                                    <div class="jwt-input-row">
+                                        <input type="text" id="jwtKey" name="jwtKey">
+                                        <button type="button" id="generateJWT" class="btn-secondary">Generate Key</button>
+                                    </div>
+                                    <small>32-character secret key for session tokens</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="jwtExpiry">Session Duration</label>
+                                <select id="jwtExpiry" name="jwtExpiry">
+                                    <option value="1h" selected>1 Hour</option>
+                                    <option value="8h">8 Hours</option>
+                                    <option value="24h">24 Hours</option>
+                                    <option value="7d">7 Days</option>
+                                </select>
+                                <small>How long users stay logged in</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bitaxe Devices -->
+                    <div class="form-section">
+                        <h3>Bitaxe Devices</h3>
+                        <p>Add your Bitaxe device URLs below. You can add more later through the configuration menu.</p>
+                        
+                        <div id="bitaxeInstances">
+                            <div class="device-instance">
+                                <div class="form-group">
+                                    <label>Device Name</label>
+                                    <input type="text" name="deviceName" placeholder="Bitaxe1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Device URL</label>
+                                    <input type="url" name="deviceUrl" placeholder="http://192.168.1.100" required>
+                                </div>
+                                <button type="button" class="remove-device btn-danger" style="display: none;">Remove</button>
+                            </div>
+                        </div>
+                        
+                        <button type="button" id="addDevice" class="btn-secondary">Add Another Device</button>
+                    </div>
+
+                    <!-- Mining Core Settings -->
+                    <div class="form-section">
+                        <h3>Mining Core Integration (Optional)</h3>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="enableMiningCore" name="enableMiningCore" value="true">
+                                Enable Mining Core Integration
+                            </label>
+                            <small>Connect to mining pool servers for additional statistics</small>
+                        </div>
+
+                        <div id="miningCoreFields" style="display: none;">
+                            <p>Add your Mining Core instance URLs below. You can add more later through the configuration menu.</p>
+
+                            <div id="miningCoreInstances">
+                                <div class="mining-core-instance">
+                                    <div class="form-group">
+                                        <label>Instance Name</label>
+                                        <input type="text" name="miningCoreName" placeholder="Mining Core 149">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Mining Core URL</label>
+                                        <input type="url" name="miningCoreUrl" placeholder="http://192.168.1.100:4000">
+                                    </div>
+                                    <button type="button" class="remove-mining-core btn-danger" style="display: none;">Remove</button>
+                                </div>
+                            </div>
+
+                            <button type="button" id="addMiningCore" class="btn-secondary">Add Another Mining Core</button>
+                        </div>
+                    </div>
+
+                    <!-- Crypto Node Settings -->
+                    <div class="form-section">
+                        <h3>Crypto Node Integration (Optional)</h3>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="enableCryptoNode" name="enableCryptoNode" value="true">
+                                Enable Crypto Node Integration
+                            </label>
+                            <small>Connect to your crypto node using JSON RPC</small>
+                        </div>
+
+                        <div id="cryptoNodeFields" style="display: none;">
+                            <div class="form-group">
+                                <label for="cryptoNodeType">Crypto Node Type</label>
+                                <input type="text" id="cryptoNodeType" name="cryptoNodeType" placeholder="dgb">
+                                <small>Node type (e.g., dgb, btc, ltc)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cryptoNodeName">Crypto Node Name</label>
+                                <input type="text" id="cryptoNodeName" name="cryptoNodeName" placeholder="DigiByte Node">
+                                <small>Display name for your crypto node</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cryptoNodeAlgo">Crypto Node Algo</label>
+                                <input type="text" id="cryptoNodeAlgo" name="cryptoNodeAlgo" placeholder="sha256d">
+                                <small>Mining algorithm (e.g., sha256d, scrypt)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cryptoNodeId">Crypto Node ID</label>
+                                <input type="text" id="cryptoNodeId" name="cryptoNodeId" placeholder="dgb1">
+                                <small>Unique identifier for this node</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cryptoNodeRpcIp">Crypto Node RPC IP Address</label>
+                                <input type="text" id="cryptoNodeRpcIp" name="cryptoNodeRpcIp" placeholder="192.168.1.100">
+                                <small>IP address of your crypto node RPC server</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cryptoNodeRpcPort">Crypto Node RPC Port</label>
+                                <input type="number" id="cryptoNodeRpcPort" name="cryptoNodeRpcPort" placeholder="14022" min="1" max="65535">
+                                <small>RPC port number (default: 14022)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cryptoNodeRpcAuth">Crypto Node RPC USER:PASSWORD</label>
+                                <div class="password-input-group">
+                                    <input type="password" id="cryptoNodeRpcAuth" name="cryptoNodeRpcAuth" placeholder="username:password">
+                                    <button type="button" class="password-toggle" data-target="cryptoNodeRpcAuth">👁️</button>
+                                </div>
+                                <small>RPC authentication in format user:password</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Create Configuration</button>
+                    </div>
+
+                    <div id="bootstrap-message" class="message" style="display: none;"></div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; <!-- CURRENT_YEAR --> Scott Walter. Ver. <!-- VERSION --></p>
+    </footer>
+
+    <script src="/public/js/bootstrap.js"></script>
+</body>
+</html>

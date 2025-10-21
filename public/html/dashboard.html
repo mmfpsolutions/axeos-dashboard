@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/public/images/favicon.ico">
+    <title><!-- TITLE --></title>
+    <link rel="stylesheet" href="/public/css/bitaxeDashboard.min.css">
+    <link rel="stylesheet" href="/public/css/modal.min.css">
+    <link rel="stylesheet" href="/public/css/statisticsModal.min.css">
+</head>
+<body>
+    <header>
+        <h1><!-- TITLE --></h1>
+        <p >Version: <!-- VERSION --> <!-- CONFIG VERSION --></p>
+        <!-- LOGIN INFO -->
+    </header>
+
+    <div class="main-container">
+        <main class="dashboard-panel" id="dashboard-panel">
+            <div class="dashboard-header">
+                <h2>Mining Dashboard</h2>
+                <div class="dashboard-controls">
+                    <span id="config-icon" class="config-icon" title="Configuration"></span>
+                    <span id="refresh-icon" class="refresh-icon" title="Refresh Dashboard"></span>
+                </div>
+            </div>
+            <div id="mining-core-details">
+                <!-- Mining Core data will be displayed here by client-side JS -->
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; <!-- CURRENT_YEAR --> Scott Walter. Last updated: <span id="timestamp"><!-- TIMESTAMP --></span>, Ver. <!-- VERSION --> | Icons by <a href="https://icons8.com" target="_blank" rel="noopener noreferrer">Icons8</a></p>
+    </footer>
+
+    <!-- Application scripts -->
+    <script src="/public/js/modalService.min.js"></script>
+    <script src="/public/js/statisticsModal.min.js"></script>
+    <script src="/public/js/clientDashboard.min.js"></script>
+</body>
+</html>

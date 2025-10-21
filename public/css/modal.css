@@ -1,0 +1,293 @@
+/* Modal styles */
+.modal {
+    display: block; /* Hidden by default, displayed with JS */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.6); /* Darker overlay */
+}
+
+.modal-content {
+    background-color: #2c2c2c; /* Dark background to match dashboard */
+    color: #e0e0e0; /* Light text */
+    margin: 5% auto; /* 5% from the top and centered */
+    padding: 20px;
+    border: 1px solid #444; /* Darker border */
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    animation-name: animatetop;
+    animation-duration: 0.4s
+}
+
+/* Add Animation */
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #fff; /* Lighter color on hover */
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    border-bottom: 2px solid #ff1744; /* Red accent to match dashboard */
+    padding-bottom: 10px;
+    color: #f5f5f5; /* Light heading text */
+}
+
+.modal-content h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #f0f0f0; /* Light subheading text */
+    font-size: 1.1em;
+    border-left: 4px solid #ff1744; /* Red accent to match dashboard */
+    padding-left: 10px;
+}
+
+#settings-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.form-grid label {
+    font-weight: bold;
+    text-align: right;
+    padding-right: 15px;
+    white-space: nowrap;
+}
+
+.form-grid input[type="text"],
+.form-grid input[type="password"],
+.form-grid input[type="number"],
+.form-grid select,
+.form-grid textarea {
+    background-color: #3a3a3a; /* Dark input background */
+    color: #e0e0e0; /* Light input text */
+    border: 1px solid #555; /* Darker border */
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease-in-out;
+    font-family: inherit;
+}
+
+.form-grid input:focus, .form-grid select:focus, .form-grid textarea:focus {
+    border-color: #ff1744; /* Red accent on focus */
+    outline: none;
+}
+
+.form-grid textarea {
+    resize: vertical; /* Allow vertical resize only */
+    min-height: 80px;
+}
+
+.form-grid input[type="checkbox"] {
+    justify-self: start;
+    width: 1.2em;
+    height: 1.2em;
+}
+
+.form-grid .full-width-field {
+    grid-column: 1 / -1;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #444; /* Darker border */
+}
+
+.modal-actions .animated-button {
+    margin-left: 10px;
+}
+
+.modal-actions .cancel-button {
+    background-color: #6c757d; /* Gray background */
+    border: 2px solid #6c757d; /* Match border to background */
+    color: #fff; /* White text */
+}
+
+.modal-actions .cancel-button:hover {
+    background-color: #5a6268; /* Darker gray on hover */
+    border-color: #5a6268;
+    color: #fff; /* Keep text white */
+}
+
+/* Prevent the red ::before fill effect from the main CSS on the cancel button */
+.modal-actions .cancel-button::before {
+    display: none;
+}
+
+.confirm-message {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 1.1em;
+    line-height: 1.5;
+}
+
+/* Bitaxe Instances Table Styling */
+#bitaxe-instances-container {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.instances-table-header {
+    display: grid;
+    grid-template-columns: 1fr 2fr auto;
+    gap: 10px;
+    padding: 10px;
+    background-color: #444;
+    border-radius: 4px 4px 0 0;
+    font-weight: bold;
+    color: #f0f0f0;
+    border-bottom: 1px solid #555;
+}
+
+#bitaxe-instances-rows {
+    background-color: #3a3a3a;
+    border-radius: 0 0 4px 4px;
+    border: 1px solid #555;
+    border-top: none;
+}
+
+.instance-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr auto;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #555;
+}
+
+.instance-row:last-child {
+    border-bottom: none;
+}
+
+.instance-row input[type="text"] {
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+    border: 1px solid #666;
+    padding: 8px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.instance-row input[type="text"]:focus {
+    border-color: #ff1744;
+    outline: none;
+}
+
+.remove-instance-btn {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: white !important;
+    font-size: 0.8em;
+    padding: 6px 12px;
+    white-space: nowrap;
+}
+
+.remove-instance-btn:hover {
+    background-color: #c82333 !important;
+    border-color: #bd2130 !important;
+}
+
+.remove-instance-btn::before {
+    background-color: #c82333 !important;
+}
+
+.add-instance-btn {
+    margin-top: 10px;
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    color: white !important;
+    font-size: 0.9em;
+}
+
+.add-instance-btn:hover {
+    background-color: #218838 !important;
+    border-color: #1e7e34 !important;
+}
+
+.add-instance-btn::before {
+    background-color: #218838 !important;
+}
+
+/* Mining Core Instances Table Styling */
+#mining-core-instances-container {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.mining-core-table-header {
+    display: grid;
+    grid-template-columns: 1fr 2fr 100px;
+    gap: 10px;
+    padding: 10px;
+    background-color: #444;
+    border-radius: 4px 4px 0 0;
+    font-weight: bold;
+    color: #f0f0f0;
+    border-bottom: 1px solid #555;
+}
+
+#mining-core-instances-rows {
+    background-color: #3a3a3a;
+    border-radius: 0 0 4px 4px;
+    border: 1px solid #555;
+    border-top: none;
+}
+
+.mining-core-instance-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr 100px;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #555;
+}
+
+.mining-core-instance-row:last-child {
+    border-bottom: none;
+}
+
+.mining-core-instance-row input[type="text"] {
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+    border: 1px solid #666;
+    padding: 8px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.mining-core-instance-row input[type="text"]:focus {
+    border-color: #ff1744;
+    outline: none;
+}
