@@ -77,7 +77,7 @@ func GetUserFromContext(r *http.Request) *User {
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Skip logging for health check endpoint to avoid log clutter
-		if r.URL.Path == "/public/html/health.html" || r.URL.Path == "/html/health.html" {
+		if strings.Contains(r.URL.Path, "health.html") {
 			next.ServeHTTP(w, r)
 			return
 		}
