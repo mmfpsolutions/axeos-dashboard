@@ -31,6 +31,24 @@ AxeOS Dashboard is a complete port of the Node.js-based Bitaxe Dashboard to Go, 
 - Docker (recommended) OR Go 1.23+
 - Configuration files (see [Configuration](#configuration) section)
 
+### Docker Hub Images (Multi-Architecture)
+
+Pre-built Docker images are available for AMD64 and ARM64:
+
+```bash
+# Pull latest image (automatically selects correct architecture)
+docker pull scottwalter/axeos-dashboard:latest
+
+# Run with bootstrap mode (first-time setup)
+docker run -d \
+  --name axeos-dashboard \
+  -p 3000:3000 \
+  -v $(pwd)/config:/app/config \
+  scottwalter/axeos-dashboard:latest
+
+# Visit http://localhost:3000 to complete setup
+```
+
 ### Option 1: Docker Run Script (Recommended)
 
 The easiest way to run with persistent configuration:
