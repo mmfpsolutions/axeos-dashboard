@@ -76,6 +76,12 @@ func GetUserFromContext(r *http.Request) *User {
 // LoggingMiddleware logs each request
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Skip logging for health check endpoint to avoid log clutter
+		if r.URL.Path == "/public/html/health.html" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		// Determine the client's real IP address, considering proxies
 		clientIP := r.Header.Get("X-Forwarded-For")
 		if clientIP == "" {

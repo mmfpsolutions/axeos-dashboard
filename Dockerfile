@@ -70,9 +70,9 @@ ENV PORT=3000
 # This makes right-click → Run work automatically on macOS
 LABEL com.docker.extension.port.3000="3000"
 
-# Health check - use public static file to avoid auth redirects in logs
+# Health check - use dedicated health page to avoid cluttering logs
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/public/css/bootstrap.min.css || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/public/html/health.html || exit 1
 
 # Run the application
 CMD ["./axeos-dashboard"]
