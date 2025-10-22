@@ -81,6 +81,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Configuration button will be added after data is loaded and we know the disable_configurations setting
 
+    /**
+     * Shows skeleton loader placeholders while data is loading
+     * @param {number} count - Number of skeleton cards to show (default: 3)
+     */
+    function showSkeletonLoaders(count = 3) {
+        const skeletons = Array(count).fill(0).map(() =>
+            '<div class="miner-card skeleton-card"></div>'
+        ).join('');
+
+        miningCoreDetailsDiv.innerHTML = `
+            <div class="miner-cards-container">
+                ${skeletons}
+            </div>
+        `;
+    }
+
+    // Show skeleton loaders before fetching data
+    showSkeletonLoaders(3);
+
     // --- Retrieve and Parse Data via Fetch ---
     fetch('/api/systems/info')
         .then(response => {
