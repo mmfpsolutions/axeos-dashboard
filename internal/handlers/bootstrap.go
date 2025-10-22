@@ -14,8 +14,8 @@ import (
 	"time"
 )
 
-// BitaxeInstance represents a single Bitaxe device
-type BitaxeInstance struct {
+// AxeosInstance represents a single AxeOS device
+type AxeosInstance struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
 }
@@ -40,8 +40,8 @@ type BootstrapRequest struct {
 	JWTKey          string `json:"jwtKey"`
 	JWTExpiry       string `json:"jwtExpiry"`
 
-	// Bitaxe Devices
-	BitaxeInstances []BitaxeInstance `json:"bitaxeInstances"`
+	// AxeOS Devices
+	AxeosInstances []AxeosInstance `json:"axeosInstances"`
 
 	// Mining Core Settings
 	EnableMiningCore    string               `json:"enableMiningCore"` // Comes as "true"/"false" string
@@ -152,11 +152,11 @@ func HandleBootstrapSubmit(configDir string) http.HandlerFunc {
 			}
 		}
 
-		// Validate at least one Bitaxe device
-		if len(req.BitaxeInstances) == 0 {
+		// Validate at least one AxeOS device
+		if len(req.AxeosInstances) == 0 {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]string{"message": "At least one Bitaxe device is required"})
+			json.NewEncoder(w).Encode(map[string]string{"message": "At least one AxeOS device is required"})
 			return
 		}
 
@@ -245,14 +245,14 @@ func createConfig(req BootstrapRequest) map[string]interface{} {
 
 	// Create config as map to preserve exact JSON structure
 	cfg := map[string]interface{}{
-		"bitaxe_dashboard_version": 3.0,
+		"axeos_dashboard_version": 3.0,
 		"disable_authentication":   !enableAuth,
 		"cookie_max_age":           3600,
 		"disable_settings":         false,
 		"disable_configurations":   false,
 		"web_server_port":          port,
 		"title":                    req.Title,
-		"bitaxe_instances":         []map[string]string{},
+		"axeos_instances":         []map[string]string{},
 		"display_fields":           getDefaultDisplayFields(),
 		"mining_core_enabled":      enableMiningCore,
 		"mining_core_url":          []map[string]string{},
@@ -260,19 +260,19 @@ func createConfig(req BootstrapRequest) map[string]interface{} {
 		"cryptNodesEnabled":        enableCryptoNode,
 		"cryptoNodes":              nil,
 		"configuration_outdated":   false,
-		"bitaxe_api":               nil,
+		"axeos_api":               nil,
 	}
 
-	// Add Bitaxe devices
-	bitaxeInstances := []map[string]string{}
-	for _, device := range req.BitaxeInstances {
+	// Add AxeOS devices
+	axeosInstances := []map[string]string{}
+	for _, device := range req.AxeosInstances {
 		if device.Name != "" && device.URL != "" {
-			bitaxeInstances = append(bitaxeInstances, map[string]string{
+			axeosInstances = append(axeosInstances, map[string]string{
 				device.Name: device.URL,
 			})
 		}
 	}
-	cfg["bitaxe_instances"] = bitaxeInstances
+	cfg["axeos_instances"] = axeosInstances
 
 	// Add Mining Core instances if enabled
 	if enableMiningCore && req.MiningCoreInstances != nil {
@@ -435,7 +435,7 @@ func generateRandomKey(length int) string {
 	return hex.EncodeToString(bytes)
 }
 
-// getDefaultDisplayFields returns the default display fields for Bitaxe instances
+// getDefaultDisplayFields returns the default display fields for AxeOS instances
 func getDefaultDisplayFields() []map[string]interface{} {
 	return []map[string]interface{}{
 		{

@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/scottwalter/axeos-dashboard/internal/logger"
 )
 
 // RPCConfig represents the rpcConfig.json structure
@@ -32,6 +33,7 @@ type RPCClient struct {
 	rpcConfig *RPCConfig
 	mu        sync.RWMutex
 	client    *http.Client
+	log       *logger.Logger
 }
 
 // RPCRequest represents a JSON-RPC request
@@ -62,6 +64,7 @@ func NewRPCClient(configDir string) *RPCClient {
 		client: &http.Client{
 			Timeout: 30 * 1000000000, // 30 seconds in nanoseconds
 		},
+		log: logger.New(logger.ModuleService),
 	}
 }
 
@@ -104,6 +107,27 @@ func (r *RPCClient) getRPCConnectionDetails(nodeID string) (*RPCNodeConfig, erro
 	return nil, fmt.Errorf("node ID '%s' not found in rpcConfig.json", nodeID)
 }
 
+// LoadConfig publicly loads the RPC configuration
+func (r *RPCClient) LoadConfig() error {
+	return r.loadRPCConfig()
+}
+
+// GetConfiguredNodes returns a list of all configured node IDs
+func (r *RPCClient) GetConfiguredNodes() []string {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	if r.rpcConfig == nil {
+		return []string{}
+	}
+
+	nodeIDs := make([]string, 0, len(r.rpcConfig.CryptoNodes))
+	for _, node := range r.rpcConfig.CryptoNodes {
+		nodeIDs = append(nodeIDs, node.NodeID)
+	}
+	return nodeIDs
+}
+
 // CallRPC makes a JSON-RPC call to a cryptocurrency node
 func (r *RPCClient) CallRPC(nodeID, method string, params []interface{}) (interface{}, error) {
 	// Ensure config is loaded
@@ -144,7 +168,7 @@ func (r *RPCClient) CallRPC(nodeID, method string, params []interface{}) (interf
 	authEncoded := base64.StdEncoding.EncodeToString([]byte(nodeConfig.NodeRPAuth))
 	req.Header.Set("Authorization", "Basic "+authEncoded)
 
-	log.Printf("[rpcClient] Sending RPC request to %s:%d - Method: %s",
+	r.log.Info("Sending RPC request to %s:%d - Method: %s",
 		nodeConfig.NodeRPCAddress, nodeConfig.NodeRPCPort, method)
 
 	// Send request

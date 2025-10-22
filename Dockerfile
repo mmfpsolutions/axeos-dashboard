@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.23-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 # Install build dependencies including Node.js for minification
 RUN apk add --no-cache git nodejs npm
@@ -27,12 +27,12 @@ RUN terser public/js/clientLogin.js -o public/js/clientLogin.min.js --compress -
     terser public/js/bootstrap.js -o public/js/bootstrap.min.js --compress --mangle
 
 # Minify CSS files
-RUN cleancss -o public/css/bitaxeDashboard.min.css public/css/bitaxeDashboard.css && \
+RUN cleancss -o public/css/axeosDashboard.min.css public/css/axeosDashboard.css && \
     cleancss -o public/css/modal.min.css public/css/modal.css && \
     cleancss -o public/css/statisticsModal.min.css public/css/statisticsModal.css && \
     cleancss -o public/css/bootstrap.min.css public/css/bootstrap.css
 
-# Build the application
+# Build the application (no CGO needed for modernc.org/sqlite)
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o axeos-dashboard ./cmd/server
 
 # Final stage
@@ -56,6 +56,9 @@ COPY --from=builder --chown=app:app /build/public ./public
 
 # Copy config files into the image (can be overridden by volume mount)
 COPY --chown=app:app config /app/config
+
+# Create data directory with proper permissions for app user
+RUN mkdir -p /app/data && chown -R app:app /app/data
 
 # Switch to app user
 USER app

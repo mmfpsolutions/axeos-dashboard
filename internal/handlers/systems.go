@@ -47,11 +47,11 @@ func HandleSystemsInfo(cfgManager *config.Manager, cryptoNodeSvc *services.Crypt
 		apiPath := services.GetAPIPath(cfg, "instanceInfo")
 		allMinerData := []map[string]interface{}{}
 
-		// Fetch data from all Bitaxe instances concurrently
+		// Fetch data from all AxeOS instances concurrently
 		var wg sync.WaitGroup
-		minerChan := make(chan map[string]interface{}, len(cfg.BitaxeInstances))
+		minerChan := make(chan map[string]interface{}, len(cfg.AxeosInstances))
 
-		for _, instance := range cfg.BitaxeInstances {
+		for _, instance := range cfg.AxeosInstances {
 			for instanceName, instanceURL := range instance {
 				wg.Add(1)
 				go func(name, url string) {

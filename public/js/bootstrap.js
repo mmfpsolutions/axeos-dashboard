@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const cryptoNodeFields = document.getElementById('cryptoNodeFields');
     const generateJWTButton = document.getElementById('generateJWT');
     const addDeviceButton = document.getElementById('addDevice');
-    const bitaxeInstancesContainer = document.getElementById('bitaxeInstances');
+    const axeosInstancesContainer = document.getElementById('axeosInstances');
     const addMiningCoreButton = document.getElementById('addMiningCore');
     const miningCoreInstancesContainer = document.getElementById('miningCoreInstances');
     const messageDiv = document.getElementById('bootstrap-message');
@@ -146,14 +146,14 @@ document.addEventListener('DOMContentLoaded', function() {
      * Adds a new device instance to the form
      */
     function addDeviceInstance() {
-        const deviceCount = bitaxeInstancesContainer.children.length;
+        const deviceCount = axeosInstancesContainer.children.length;
         const deviceInstance = document.createElement('div');
         deviceInstance.className = 'device-instance';
         
         deviceInstance.innerHTML = `
             <div class="form-group">
                 <label>Device Name</label>
-                <input type="text" name="deviceName" placeholder="Bitaxe${deviceCount + 1}" required>
+                <input type="text" name="deviceName" placeholder="AxeOS${deviceCount + 1}" required>
             </div>
             <div class="form-group">
                 <label>Device URL</label>
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <button type="button" class="remove-device btn-danger">Remove</button>
         `;
 
-        bitaxeInstancesContainer.appendChild(deviceInstance);
+        axeosInstancesContainer.appendChild(deviceInstance);
         updateRemoveButtonHandlers();
     }
 
@@ -264,16 +264,16 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.jwtExpiry = document.getElementById('jwtExpiry').value;
         }
 
-        // Collect Bitaxe instances
+        // Collect AxeOS instances
         const deviceInstances = document.querySelectorAll('.device-instance');
-        formData.bitaxeInstances = [];
+        formData.axeosInstances = [];
         
         deviceInstances.forEach(instance => {
             const name = instance.querySelector('input[name="deviceName"]').value;
             const url = instance.querySelector('input[name="deviceUrl"]').value;
             
             if (name && url) {
-                formData.bitaxeInstances.push({ name, url });
+                formData.axeosInstances.push({ name, url });
             }
         });
 
@@ -331,8 +331,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            if (formData.bitaxeInstances.length === 0) {
-                showMessage('At least one Bitaxe device is required.', 'error');
+            if (formData.axeosInstances.length === 0) {
+                showMessage('At least one AxeOS device is required.', 'error');
                 return;
             }
 

@@ -35,11 +35,11 @@ func HandleDashboard(cfgManager *config.Manager, publicDir string) http.HandlerF
 		html := string(htmlContent)
 
 		// Replace placeholders
-		title := "Bitaxe Dashboard"
+		title := "AxeOS Dashboard"
 		version := "1.0"
 		if cfg != nil {
 			title = cfg.Title // Use title from config
-			version = safeToFixed(cfg.BitaxeDashboardVersion)
+			version = safeToFixed(cfg.AxeosDashboardVersion)
 		}
 
 		currentYear := fmt.Sprintf("%d", time.Now().Year())
@@ -96,7 +96,7 @@ func HandleLoginPage(cfgManager *config.Manager, publicDir string) http.HandlerF
 		currentYear := fmt.Sprintf("%d", time.Now().Year())
 
 		if cfg != nil {
-			version = safeToFixed(cfg.BitaxeDashboardVersion)
+			version = safeToFixed(cfg.AxeosDashboardVersion)
 		}
 
 		html = strings.ReplaceAll(html, "<!-- TITLE -->", title)

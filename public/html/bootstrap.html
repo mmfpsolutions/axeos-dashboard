@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>First Time Setup - <!-- TITLE --></title>
-    <link rel="stylesheet" href="/public/css/bitaxeDashboard.min.css">
+    <link rel="stylesheet" href="/public/css/axeosDashboard.min.css">
     <link rel="stylesheet" href="/public/css/bootstrap.min.css">
     <link rel="icon" href="/public/favicon.ico" type="image/x-icon">
 </head>
@@ -18,11 +18,11 @@
         <main class="details-pane">
             <div id="bootstrap-container">
                 <div class="bootstrap-header">
-                    <h2>Welcome to Bitaxe Dashboard</h2>
+                    <h2>Welcome to AxeOS Dashboard</h2>
                     <p>This appears to be your first time running the application. Please configure the initial settings below.</p>
-                    <p style="color: #ff1744;">!!!! If you are running Bitaxe-Dashboard via Docker make sure you have mapped the config folder to you local filesystem !!!!</p>
+                    <p style="color: #ff1744;">!!!! If you are running AxeOS-Dashboard via Docker make sure you have mapped the config folder to you local filesystem !!!!</p>
                     <p style="color: #ff1744;">Docker Run Example:</p>
-                    <p style="color: #ff1744;"> sudo docker run -d --name bitaxe-dashboard -p 3000:3000/tcp -v {/your/local/config_path}:/app/config scottwalter/bitaxe-dashboard:latest </p>
+                    <p style="color: #ff1744;"> sudo docker run -d --name axeos-dashboard -p 3000:3000/tcp -v {/your/local/config_path}:/app/config scottwalter/axeos-dashboard:latest </p>
                 </div>
 
                 <form id="bootstrapForm" class="bootstrap-form">
@@ -32,7 +32,7 @@
                         
                         <div class="form-group">
                             <label for="title">Dashboard Title</label>
-                            <input type="text" id="title" name="title" value="Bitaxe Dashboard" required>
+                            <input type="text" id="title" name="title" value="AxeOS Dashboard" required>
                             <small>The title that will appear at the top of your dashboard</small>
                         </div>
 
@@ -105,16 +105,16 @@
                         </div>
                     </div>
 
-                    <!-- Bitaxe Devices -->
+                    <!-- AxeOS Devices -->
                     <div class="form-section">
-                        <h3>Bitaxe Devices</h3>
-                        <p>Add your Bitaxe device URLs below. You can add more later through the configuration menu.</p>
-                        
-                        <div id="bitaxeInstances">
+                        <h3>AxeOS Devices</h3>
+                        <p>Add your AxeOS device URLs below. You can add more later through the configuration menu.</p>
+
+                        <div id="axeosInstances">
                             <div class="device-instance">
                                 <div class="form-group">
                                     <label>Device Name</label>
-                                    <input type="text" name="deviceName" placeholder="Bitaxe1" required>
+                                    <input type="text" name="deviceName" placeholder="AxeOS1" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Device URL</label>

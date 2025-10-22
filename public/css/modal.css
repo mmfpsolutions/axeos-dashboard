@@ -153,8 +153,8 @@
     line-height: 1.5;
 }
 
-/* Bitaxe Instances Table Styling */
-#bitaxe-instances-container {
+/* AxeOS Instances Table Styling */
+#axeos-instances-container {
     width: 100%;
     margin-top: 10px;
 }
@@ -171,7 +171,7 @@
     border-bottom: 1px solid #555;
 }
 
-#bitaxe-instances-rows {
+#axeos-instances-rows {
     background-color: #3a3a3a;
     border-radius: 0 0 4px 4px;
     border: 1px solid #555;

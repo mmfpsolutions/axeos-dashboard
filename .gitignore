@@ -23,6 +23,10 @@ go.work
 config/*.json
 !config/.gitkeep
 
+# Data directory (metrics database)
+data/
+!data/.gitkeep
+
 # IDE
 # .vscode/ - Keep this for Docker extension configuration
 .idea/

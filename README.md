@@ -17,6 +17,7 @@ AxeOS Dashboard is a complete port of the Node.js-based Bitaxe Dashboard to Go, 
 - 🖥️ **Multi-Device Monitoring** - Monitor multiple Bitaxe mining devices simultaneously
 - ⚙️ **Device Control** - Remote restart, WiFi configuration, mining pool settings
 - 📊 **Real-time Statistics** - Live hashrate, temperature, and performance metrics with charts
+- 📈 **Historical Data Collection** - Store metrics in SQLite for long-term analysis
 - 🔐 **JWT Authentication** - Secure login with HTTP-only cookies
 - 🔧 **Hot Configuration Reload** - Update settings without server restart
 - 🌐 **Mining Pool Integration** - Support for Mining Core pool monitoring
@@ -44,6 +45,7 @@ docker run -d \
   --name axeos-dashboard \
   -p 3000:3000 \
   -v $(pwd)/config:/app/config \
+  -v $(pwd)/data:/app/data \
   scottwalter/axeos-dashboard:latest
 
 # Visit http://localhost:3000 to complete setup
@@ -62,6 +64,7 @@ This script automatically:
 - Detects your OS (macOS/Linux/Windows)
 - Uses appropriate networking (port mapping on macOS, host network on Linux)
 - Mounts config directory for persistent changes
+- Mounts data directory for metrics storage
 - Starts the container with proper settings
 
 ### Option 2: Docker Compose
@@ -89,17 +92,19 @@ Access the dashboard at: **http://localhost:3000**
 # Build the image
 docker build -t axeos-dashboard:latest .
 
-# Run with volume mount for persistent config
+# Run with volume mounts for persistent config and data
 # macOS/Windows (use port mapping):
 docker run -d --name axeos-dashboard \
   -p 3000:3000 \
   -v $(pwd)/config:/app/config \
+  -v $(pwd)/data:/app/data \
   axeos-dashboard:latest
 
 # Linux (can use host network):
 docker run -d --name axeos-dashboard \
   --network host \
   -v $(pwd)/config:/app/config \
+  -v $(pwd)/data:/app/data \
   axeos-dashboard:latest
 ```
 
@@ -116,26 +121,32 @@ Place these files in the `config/` directory:
 
 ### Configuration Persistence
 
-**IMPORTANT**: Always use a volume mount (`-v`) to persist configuration changes:
+**IMPORTANT**: Always use volume mounts (`-v`) to persist configuration and data:
 
 ```bash
 -v /path/to/config:/app/config
+-v /path/to/data:/app/data
 ```
 
-Without the volume mount, configuration changes made through the UI will be lost when the container restarts.
+Without the volume mounts:
+- Configuration changes made through the UI will be lost when the container restarts
+- Historical metrics data will be lost when the container restarts
 
 ### Example config.json
 
 ```json
 {
-  "bitaxe_dashboard_version": 3.0,
+  "axeos_dashboard_version": 3.0,
   "web_server_port": 3000,
   "title": "AxeOS Dashboard",
   "disable_authentication": false,
   "disable_settings": false,
   "disable_configurations": false,
   "cookie_max_age": 3600,
-  "bitaxe_instances": [
+  "data_collection_enabled": true,
+  "collection_interval_seconds": 300,
+  "data_retention_days": 30,
+  "axeos_instances": [
     {"MyAxe1": "http://192.168.1.100"},
     {"MyAxe2": "http://192.168.1.101"}
   ],
@@ -143,7 +154,7 @@ Without the volume mount, configuration changes made through the UI will be lost
   "mining_core_enabled": false,
   "mining_core_url": [],
   "cryptNodesEnabled": false,
-  "bitaxe_api": {
+  "axeos_api": {
     "instanceInfo": "/api/system/info",
     "instanceRestart": "/api/system/restart",
     "instanceSettings": "/api/system",
@@ -175,6 +186,115 @@ echo -n "yourpassword" | sha256sum
 }
 ```
 
+## Logging
+
+AxeOS Dashboard features a standardized logging system for easy monitoring and troubleshooting.
+
+### Log Format
+
+All logs follow a consistent format:
+```
+[timestamp] [client_ip/system] [module] action
+```
+
+**Example logs:**
+```
+[2025-10-22 02:35:00] [system] [main] Server running on http://localhost:3000
+[2025-10-22 02:35:07] [192.168.65.1] [middleware] Request: GET /api/systems/info
+[2025-10-22 02:35:07] [system] [service] Sending RPC request to 192.168.7.138:9001
+[2025-10-22 02:35:00] [system] [scheduler] Collected AxeOS metrics from AxeOS1
+```
+
+### Log Modules
+
+- **main** - Server lifecycle (startup, shutdown, initialization)
+- **config** - Configuration loading and reloading
+- **database** - Database operations and connections
+- **scheduler** - Data collection task scheduling
+- **middleware** - HTTP request/response logging
+- **service** - RPC and external service calls
+- **auth** - Authentication and authorization events
+
+### Viewing Logs
+
+```bash
+# Docker container logs
+docker logs axeos-dashboard
+
+# Follow logs in real-time
+docker logs -f axeos-dashboard
+
+# Filter by module
+docker logs axeos-dashboard 2>&1 | grep "\[scheduler\]"
+
+# Filter by client IP
+docker logs axeos-dashboard 2>&1 | grep "\[192.168.1.100\]"
+```
+
+## Data Collection
+
+AxeOS Dashboard can automatically collect and store historical metrics from your devices, pools, and nodes using SQLite.
+
+### Features
+
+- **Automated Collection**: Scheduled data collection using Go's `time.Ticker`
+- **Non-blocking Architecture**: Each collection task runs in its own goroutine
+- **SQLite Storage**: Efficient embedded storage for analytical queries (pure Go, no CGO)
+- **Configurable Intervals**: Set collection frequency per your needs
+- **Data Retention**: Automatic cleanup of old metrics
+- **Singleton Pattern**: Thread-safe database and scheduler managers
+
+### Configuration
+
+Enable data collection in your `config.json`:
+
+```json
+{
+  "data_collection_enabled": true,
+  "collection_interval_seconds": 300,
+  "data_retention_days": 30
+}
+```
+
+**Configuration Options:**
+
+- `data_collection_enabled` (boolean): Enable/disable data collection (default: `false`)
+- `collection_interval_seconds` (integer): How often to collect metrics in seconds (default: `300` = 5 minutes)
+- `data_retention_days` (integer): How many days to keep historical data (default: `30` days)
+
+### Data Storage
+
+Metrics are stored in `/app/data/metrics.db` within the container. **Always mount the data directory** to persist metrics:
+
+```bash
+-v $(pwd)/data:/app/data
+```
+
+The database contains three main tables:
+
+1. **axeos_metrics** - Miner device metrics (hashrate, temperature, power, shares, etc.)
+2. **pool_metrics** - Mining pool statistics (hashrate, workers, blocks, etc.)
+3. **node_metrics** - Cryptocurrency node data (block height, connections, mempool, etc.)
+
+### Data Persistence
+
+The `./docker-run.sh` script automatically:
+- Creates the `data/` directory if it doesn't exist
+- Mounts it to `/app/data` in the container
+- Ensures metrics survive container restarts
+
+**Manual setup:**
+
+```bash
+mkdir -p data
+docker run -d \
+  --name axeos-dashboard \
+  -p 3000:3000 \
+  -v $(pwd)/config:/app/config \
+  -v $(pwd)/data:/app/data \
+  axeos-dashboard:latest
+```
+
 ## macOS / Windows Docker Notes
 
 **Important**: Docker's `--network host` mode does **NOT** work on macOS or Windows. You must use **port mapping** with `-p`:
@@ -194,10 +314,12 @@ The `docker-run.sh` script automatically detects your OS and uses the correct ne
 ### Technology Stack
 
 - **Backend**: Go 1.23+
+- **Database**: SQLite (pure Go embedded database via modernc.org/sqlite)
 - **Authentication**: JWT (golang-jwt/jwt/v5)
 - **Frontend**: Vanilla JavaScript (no frameworks)
 - **Configuration**: JSON-based with hot-reload
 - **HTTP Server**: Native Go net/http with custom routing
+- **Scheduling**: Go standard library `time.Ticker`
 
 ### Project Structure
 
@@ -208,15 +330,19 @@ axeos-dashboard/
 ├── internal/
 │   ├── auth/            # JWT authentication
 │   ├── config/          # Configuration management (singleton pattern)
+│   ├── database/        # SQLite database management (singleton pattern)
 │   ├── handlers/        # HTTP request handlers
+│   ├── logger/          # Centralized logging system
 │   ├── middleware/      # Authentication & logging middleware
 │   ├── router/          # HTTP routing
+│   ├── scheduler/       # Data collection scheduler (time.Ticker tasks)
 │   └── services/        # Business logic (crypto nodes, RPC)
 ├── public/              # Static assets (HTML, CSS, JS)
 │   ├── html/
 │   ├── css/
 │   └── js/
 ├── config/              # Configuration files (volume mount point)
+├── data/                # Metrics database (volume mount point)
 ├── Dockerfile           # Multi-stage Docker build
 ├── docker-compose.yml   # Docker Compose configuration
 └── docker-run.sh        # Helper script for docker run
@@ -253,7 +379,7 @@ AxeOS Dashboard is designed as a drop-in replacement:
 
 1. **Stop the Node.js application**
    ```bash
-   docker stop bitaxe-dashboard
+   docker stop axeos-dashboard
    ```
 
 2. **Copy your configuration files** (they're 100% compatible)

@@ -38,7 +38,7 @@ func HandleInstanceInfo(cfgManager *config.Manager) http.HandlerFunc {
 
 		// Find the instance
 		var instanceURL string
-		for _, instance := range cfg.BitaxeInstances {
+		for _, instance := range cfg.AxeosInstances {
 			if url, ok := instance[instanceID]; ok {
 				instanceURL = url
 				break
@@ -50,7 +50,7 @@ func HandleInstanceInfo(cfgManager *config.Manager) http.HandlerFunc {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(map[string]string{
 				"error":   "Not Found",
-				"message": fmt.Sprintf("Bitaxe instance \"%s\" not found in configuration.", instanceID),
+				"message": fmt.Sprintf("AxeOS instance \"%s\" not found in configuration.", instanceID),
 			})
 			return
 		}
@@ -59,10 +59,10 @@ func HandleInstanceInfo(cfgManager *config.Manager) http.HandlerFunc {
 		apiPath := services.GetAPIPath(cfg, "instanceInfo")
 		infoURL := instanceURL + apiPath
 
-		// Fetch data from the Bitaxe device
+		// Fetch data from the AxeOS device
 		resp, err := http.Get(infoURL)
 		if err != nil {
-			fmt.Printf("Error fetching from Bitaxe instance: %v\n", err)
+			fmt.Printf("Error fetching from AxeOS instance: %v\n", err)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]string{
@@ -78,7 +78,7 @@ func HandleInstanceInfo(cfgManager *config.Manager) http.HandlerFunc {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(resp.StatusCode)
 			json.NewEncoder(w).Encode(map[string]string{
-				"error":   "Failed to fetch data from Bitaxe instance",
+				"error":   "Failed to fetch data from AxeOS instance",
 				"message": fmt.Sprintf("HTTP error! Status: %d, Body: %s", resp.StatusCode, string(errorText)),
 			})
 			return
@@ -119,7 +119,7 @@ func HandleInstanceRestart(cfgManager *config.Manager) http.HandlerFunc {
 
 		// Find the instance
 		var instanceURL string
-		for _, instance := range cfg.BitaxeInstances {
+		for _, instance := range cfg.AxeosInstances {
 			if url, ok := instance[instanceID]; ok {
 				instanceURL = url
 				break
@@ -130,7 +130,7 @@ func HandleInstanceRestart(cfgManager *config.Manager) http.HandlerFunc {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(map[string]string{
-				"message": fmt.Sprintf("Bitaxe instance \"%s\" not found in configuration.", instanceID),
+				"message": fmt.Sprintf("AxeOS instance \"%s\" not found in configuration.", instanceID),
 			})
 			return
 		}
@@ -141,7 +141,7 @@ func HandleInstanceRestart(cfgManager *config.Manager) http.HandlerFunc {
 
 		resp, err := http.Post(restartURL, "application/json", nil)
 		if err != nil {
-			fmt.Printf("Failed to restart Bitaxe: %v\n", err)
+			fmt.Printf("Failed to restart AxeOS: %v\n", err)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]string{"message": "Internal Server Error", "error": err.Error()})
@@ -196,7 +196,7 @@ func HandleInstanceSettings(cfgManager *config.Manager) http.HandlerFunc {
 
 		// Find the instance
 		var instanceURL string
-		for _, instance := range cfg.BitaxeInstances {
+		for _, instance := range cfg.AxeosInstances {
 			if url, ok := instance[instanceID]; ok {
 				instanceURL = url
 				break
@@ -207,7 +207,7 @@ func HandleInstanceSettings(cfgManager *config.Manager) http.HandlerFunc {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(map[string]string{
-				"message": fmt.Sprintf("Bitaxe instance \"%s\" not found in configuration.", instanceID),
+				"message": fmt.Sprintf("AxeOS instance \"%s\" not found in configuration.", instanceID),
 			})
 			return
 		}

@@ -4,7 +4,7 @@
 # Volume mounts will still override if provided
 
 # Build stage
-FROM golang:1.23-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache git
@@ -21,7 +21,7 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application (no CGO needed for modernc.org/sqlite)
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o axeos-dashboard ./cmd/server
 
 # Final stage
@@ -47,6 +47,9 @@ COPY --chown=app:app public ./public
 # These can still be overridden by volume mounts
 RUN mkdir -p /app/config && chown app:app /app/config
 COPY --chown=app:app config/*.json /app/config/
+
+# Create data directory with proper permissions for app user
+RUN mkdir -p /app/data && chown -R app:app /app/data
 
 # Switch to app user
 USER app
