@@ -19,7 +19,7 @@ func (m *Manager) collectAxeOSMetrics(ctx context.Context) error {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 
-	for _, instance := range cfg.BitaxeInstances {
+	for _, instance := range cfg.AxeosInstances {
 		for name, baseURL := range instance {
 			select {
 			case <-ctx.Done():
@@ -45,7 +45,7 @@ func (m *Manager) collectSingleAxeOSMetric(instanceName, baseURL string) error {
 	}
 
 	// Fetch system info
-	infoEndpoint := cfg.BitaxeAPI["instanceInfo"]
+	infoEndpoint := cfg.AxeosAPI["instanceInfo"]
 	if infoEndpoint == "" {
 		infoEndpoint = "/api/system/info" // Default endpoint
 	}

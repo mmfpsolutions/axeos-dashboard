@@ -1,6 +1,6 @@
 /**
  * @file Statistics Modal Service
- * Handles real-time statistics visualization for individual BitAxe miners
+ * Handles real-time statistics visualization for individual AxeOS miners
  * Features Chart.js integration with dual Y-axis charts (lazy-loaded)
  */
 

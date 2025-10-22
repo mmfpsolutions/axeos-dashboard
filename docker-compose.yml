@@ -37,5 +37,5 @@ services:
 
     # Labels for documentation
     labels:
-      com.axeos.description: "AxeOS Dashboard - Bitaxe Mining Monitor"
+      com.axeos.description: "AxeOS Dashboard - AxeOS Mining Monitor"
       com.axeos.version: "1.0"

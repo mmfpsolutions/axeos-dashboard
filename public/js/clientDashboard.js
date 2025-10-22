@@ -1,7 +1,7 @@
 /**
- * @file Bitaxe Dashboard Client-Side Application Logic.
+ * @file AxeOS Dashboard Client-Side Application Logic.
  * 
- * This module provides the complete client-side functionality for the Bitaxe
+ * This module provides the complete client-side functionality for the AxeOS
  * Dashboard application. It manages the dynamic dashboard interface, device
  * data polling, user interactions, and real-time updates.
  * 
@@ -256,9 +256,9 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function saveSectionState(sectionId, isCollapsed) {
         try {
-            const savedStates = JSON.parse(localStorage.getItem('bitaxe-section-states') || '{}');
+            const savedStates = JSON.parse(localStorage.getItem('axeos-section-states') || '{}');
             savedStates[sectionId] = isCollapsed;
-            localStorage.setItem('bitaxe-section-states', JSON.stringify(savedStates));
+            localStorage.setItem('axeos-section-states', JSON.stringify(savedStates));
         } catch (error) {
             console.warn('Failed to save section state:', error);
         }
@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function getSectionState(sectionId) {
         try {
-            const savedStates = JSON.parse(localStorage.getItem('bitaxe-section-states') || '{}');
+            const savedStates = JSON.parse(localStorage.getItem('axeos-section-states') || '{}');
             return savedStates[sectionId] || false; // Default to expanded (false)
         } catch (error) {
             console.warn('Failed to get section state:', error);

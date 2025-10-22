@@ -27,7 +27,7 @@ RUN terser public/js/clientLogin.js -o public/js/clientLogin.min.js --compress -
     terser public/js/bootstrap.js -o public/js/bootstrap.min.js --compress --mangle
 
 # Minify CSS files
-RUN cleancss -o public/css/bitaxeDashboard.min.css public/css/bitaxeDashboard.css && \
+RUN cleancss -o public/css/axeosDashboard.min.css public/css/axeosDashboard.css && \
     cleancss -o public/css/modal.min.css public/css/modal.css && \
     cleancss -o public/css/statisticsModal.min.css public/css/statisticsModal.css && \
     cleancss -o public/css/bootstrap.min.css public/css/bootstrap.css

@@ -4,7 +4,7 @@ import "github.com/scottwalter/axeos-dashboard/internal/config"
 
 // GetAPIPath returns the API path for the given endpoint type
 func GetAPIPath(cfg *config.Config, endpointType string) string {
-	if cfg.BitaxeAPI == nil {
+	if cfg.AxeosAPI == nil {
 		// Return default paths
 		switch endpointType {
 		case "instanceInfo":
@@ -21,7 +21,7 @@ func GetAPIPath(cfg *config.Config, endpointType string) string {
 	}
 
 	// Return configured path or default
-	if path, ok := cfg.BitaxeAPI[endpointType]; ok {
+	if path, ok := cfg.AxeosAPI[endpointType]; ok {
 		return path
 	}
 

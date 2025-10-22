@@ -119,7 +119,7 @@ func (m *Manager) registerTasks(cfg *config.Config) {
 	}
 
 	// Register AxeOS miner collection task
-	if len(cfg.BitaxeInstances) > 0 {
+	if len(cfg.AxeosInstances) > 0 {
 		m.tasks = append(m.tasks, &Task{
 			Name:     "AxeOS Miners Collection",
 			Interval: collectionInterval,

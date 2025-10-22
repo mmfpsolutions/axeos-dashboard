@@ -4,7 +4,7 @@ This document contains important context and preferences for working on the AxeO
 
 ## Project Overview
 
-**AxeOS Dashboard** is a complete rewrite of the Bitaxe Dashboard, migrated from Node.js to Go. It monitors and manages:
+**AxeOS Dashboard** is a complete rewrite of the AxeOS Dashboard, migrated from Node.js to Go. It monitors and manages:
 - AxeOS miners
 - MiningCore stratum proxies
 - DigiByte Core nodes
@@ -148,9 +148,9 @@ axeos-dashboard/
 - **Methods**: `Info()`, `Error()`, `Warn()`, `Fatal()`, `Debug()`, plus `*WithRequest()` variants
 - **Timestamp Format**: YYYY-MM-DD HH:MM:SS (easy to parse and filter)
 
-## Migration from Bitaxe Dashboard
+## Migration from AxeOS Dashboard
 
-This project maintains 100% compatibility with the Node.js Bitaxe Dashboard:
+This project maintains 100% compatibility with the Node.js AxeOS Dashboard:
 - Same API endpoints
 - Same configuration file formats
 - Same authentication flow (SHA256 + JWT)

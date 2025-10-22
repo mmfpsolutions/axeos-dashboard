@@ -13,9 +13,9 @@ import (
 // Config represents the application configuration
 type Config struct {
 	WebServerPort            int                      `json:"web_server_port"`
-	BitaxeDashboardVersion   float64                  `json:"bitaxe_dashboard_version"`
+	AxeosDashboardVersion    float64                  `json:"axeos_dashboard_version"`
 	Title                    string                   `json:"title"`
-	BitaxeInstances          []map[string]string      `json:"bitaxe_instances"`
+	AxeosInstances           []map[string]string      `json:"axeos_instances"`
 	DisplayFields            interface{}              `json:"display_fields"` // Can be []string or complex nested structure
 	MiningCoreEnabled        bool                     `json:"mining_core_enabled"`
 	MiningCoreURL            []map[string]string      `json:"mining_core_url"`
@@ -27,7 +27,7 @@ type Config struct {
 	DisableConfigurations    bool                     `json:"disable_configurations"`
 	CookieMaxAge             int                      `json:"cookie_max_age"`
 	ConfigurationOutdated    bool                     `json:"configuration_outdated"`
-	BitaxeAPI                map[string]string        `json:"bitaxe_api"`
+	AxeosAPI                 map[string]string        `json:"axeos_api"`
 
 	// Data collection settings
 	DataCollectionEnabled    bool `json:"data_collection_enabled"`

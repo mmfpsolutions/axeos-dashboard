@@ -100,9 +100,9 @@ const modalService = (() => {
             category: 'AxeOS Devices',
             fields: [
                 {
-                    key: 'bitaxe_instances',
+                    key: 'axeos_instances',
                     label: '',
-                    type: 'bitaxe_instances_table'
+                    type: 'axeos_instances_table'
                 },
             ]
         }
@@ -123,7 +123,7 @@ const modalService = (() => {
                 const currentValue = deviceData[field.key] !== undefined ? deviceData[field.key] : '';
 
                 // Skip label for table types
-                if (field.type !== 'bitaxe_instances_table' && field.type !== 'mining_core_instances_table') {
+                if (field.type !== 'axeos_instances_table' && field.type !== 'mining_core_instances_table') {
                     formHtml += `<label for="${field.key}">${field.label}:</label>`;
                 }
 
@@ -147,8 +147,8 @@ const modalService = (() => {
                         const textareaValue = Array.isArray(currentValue) ? JSON.stringify(currentValue, null, 2) : currentValue;
                         fieldHtml = `<textarea id="${field.key}" name="${field.key}" rows="${rows}" placeholder="${field.placeholder || ''}">${textareaValue}</textarea>`;
                         break;
-                    case 'bitaxe_instances_table':
-                        fieldHtml = generateBitaxeInstancesTable(currentValue);
+                    case 'axeos_instances_table':
+                        fieldHtml = generateAxeOSInstancesTable(currentValue);
                         break;
                     case 'mining_core_instances_table':
                         fieldHtml = generateMiningCoreInstancesTable(currentValue);
@@ -160,7 +160,7 @@ const modalService = (() => {
                         fieldHtml = `<input type="${field.type}" id="${field.key}" name="${field.key}" value="${currentValue}" ${maxAttr} ${minAttr} ${placeholderAttr}>`;
                 }
                 let noteHtml = field.note ? ` <small>(${field.note})</small>` : '';
-                if (field.type === 'bitaxe_instances_table' || field.type === 'mining_core_instances_table') {
+                if (field.type === 'axeos_instances_table' || field.type === 'mining_core_instances_table') {
                     // For complex editors, span the full width
                     formHtml += `<div class="full-width-field">${fieldHtml}${noteHtml}</div>`;
                 } else {
@@ -173,21 +173,21 @@ const modalService = (() => {
     }
 
     /**
-     * Generates HTML for the Bitaxe instances table with add/remove functionality.
+     * Generates HTML for the AxeOS instances table with add/remove functionality.
      * @param {Array} instances - Array of instance objects from the configuration.
      * @returns {string} The HTML string for the instances table.
      */
-    function generateBitaxeInstancesTable(instances) {
+    function generateAxeOSInstancesTable(instances) {
         const instancesArray = Array.isArray(instances) ? instances : [];
         
         let tableHtml = `
-            <div id="bitaxe-instances-container">
+            <div id="axeos-instances-container">
                 <div class="instances-table-header">
                     <span>Device Name</span>
                     <span>Device URL</span>
                     <span>Actions</span>
                 </div>
-                <div id="bitaxe-instances-rows">`;
+                <div id="axeos-instances-rows">`;
         
         // Add existing instances
         instancesArray.forEach((instance, index) => {
@@ -203,7 +203,7 @@ const modalService = (() => {
         
         tableHtml += `
                 </div>
-                <button type="button" class="animated-button add-instance-btn" onclick="addBitaxeInstance()">
+                <button type="button" class="animated-button add-instance-btn" onclick="addAxeOSInstance()">
                     + Add Device
                 </button>
             </div>`;
@@ -212,7 +212,7 @@ const modalService = (() => {
     }
 
     /**
-     * Generates HTML for a single Bitaxe instance row.
+     * Generates HTML for a single AxeOS instance row.
      * @param {string} name - The device name.
      * @param {string} url - The device URL.
      * @param {number} index - The row index.
@@ -223,17 +223,17 @@ const modalService = (() => {
             <div class="instance-row" data-index="${index}">
                 <input type="text" class="instance-name" placeholder="Device Name" value="${name}">
                 <input type="text" class="instance-url" placeholder="http://192.168.1.100" value="${url}">
-                <button type="button" class="animated-button remove-instance-btn" onclick="removeBitaxeInstance(${index})">
+                <button type="button" class="animated-button remove-instance-btn" onclick="removeAxeOSInstance(${index})">
                     Remove
                 </button>
             </div>`;
     }
 
     /**
-     * Adds a new empty Bitaxe instance row.
+     * Adds a new empty AxeOS instance row.
      */
-    function addBitaxeInstance() {
-        const container = document.getElementById('bitaxe-instances-rows');
+    function addAxeOSInstance() {
+        const container = document.getElementById('axeos-instances-rows');
         const newIndex = container.children.length;
         const newRow = document.createElement('div');
         newRow.innerHTML = generateInstanceRow('', '', newIndex);
@@ -244,11 +244,11 @@ const modalService = (() => {
     }
 
     /**
-     * Removes a Bitaxe instance row.
+     * Removes a AxeOS instance row.
      * @param {number} index - The index of the row to remove.
      */
-    function removeBitaxeInstance(index) {
-        const container = document.getElementById('bitaxe-instances-rows');
+    function removeAxeOSInstance(index) {
+        const container = document.getElementById('axeos-instances-rows');
         const rows = container.querySelectorAll('.instance-row');
         
         // Don't allow removing the last row
@@ -268,26 +268,26 @@ const modalService = (() => {
      * Updates the data-index attributes and onclick handlers for all instance rows.
      */
     function updateInstanceIndices() {
-        const container = document.getElementById('bitaxe-instances-rows');
+        const container = document.getElementById('axeos-instances-rows');
         const rows = container.querySelectorAll('.instance-row');
         
         rows.forEach((row, index) => {
             row.setAttribute('data-index', index);
             const removeBtn = row.querySelector('.remove-instance-btn');
             if (removeBtn) {
-                removeBtn.setAttribute('onclick', `removeBitaxeInstance(${index})`);
+                removeBtn.setAttribute('onclick', `removeAxeOSInstance(${index})`);
             }
         });
     }
 
     /**
-     * Collects data from all Bitaxe instance rows.
+     * Collects data from all AxeOS instance rows.
      * @returns {Array} Array of instance objects.
      */
-    function collectBitaxeInstancesData() {
-        const container = document.getElementById('bitaxe-instances-rows');
+    function collectAxeOSInstancesData() {
+        const container = document.getElementById('axeos-instances-rows');
         if (!container) {
-            console.error('Bitaxe instances container not found');
+            console.error('AxeOS instances container not found');
             return [];
         }
 
@@ -546,11 +546,11 @@ const modalService = (() => {
             category.fields.forEach(field => {
                 let value;
 
-                if (field.type === 'bitaxe_instances_table') {
-                    // Handle bitaxe instances specially - no DOM element with name attribute
-                    value = collectBitaxeInstancesData();
+                if (field.type === 'axeos_instances_table') {
+                    // Handle axeos instances specially - no DOM element with name attribute
+                    value = collectAxeOSInstancesData();
                     if (value.length === 0) {
-                        alert('At least one Bitaxe device instance is required.');
+                        alert('At least one AxeOS device instance is required.');
                         return;
                     }
                     payload[field.key] = value;
@@ -716,8 +716,8 @@ const modalService = (() => {
     }
 
     // Make instance management functions globally accessible for onclick handlers
-    window.addBitaxeInstance = addBitaxeInstance;
-    window.removeBitaxeInstance = removeBitaxeInstance;
+    window.addAxeOSInstance = addAxeOSInstance;
+    window.removeAxeOSInstance = removeAxeOSInstance;
     window.addMiningCoreInstance = addMiningCoreInstance;
     window.removeMiningCoreInstance = removeMiningCoreInstance;
 
@@ -726,9 +726,9 @@ const modalService = (() => {
         openSettingsModal,
         openConfirmModal,
         openConfigModal,
-        addBitaxeInstance,
-        removeBitaxeInstance,
-        collectBitaxeInstancesData,
+        addAxeOSInstance,
+        removeAxeOSInstance,
+        collectAxeOSInstancesData,
         addMiningCoreInstance,
         removeMiningCoreInstance,
         collectMiningCoreInstancesData

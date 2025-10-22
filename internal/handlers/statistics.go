@@ -22,7 +22,7 @@ type StatisticsResponse struct {
 }
 
 // HandleStatistics handles GET /api/statistics?instanceId=X
-// Proxies the request to the BitAxe instance's /api/system/statistics/dashboard endpoint
+// Proxies the request to the AxeOS instance's /api/system/statistics/dashboard endpoint
 func HandleStatistics(w http.ResponseWriter, r *http.Request, cfgManager *config.Manager) {
 	cfg := cfgManager.GetConfig() // Get fresh config for hot reload
 	// Only allow GET requests
@@ -52,7 +52,7 @@ func HandleStatistics(w http.ResponseWriter, r *http.Request, cfgManager *config
 
 	// Find the instance configuration
 	var instanceURL string
-	for _, instance := range cfg.BitaxeInstances {
+	for _, instance := range cfg.AxeosInstances {
 		if url, ok := instance[instanceID]; ok {
 			instanceURL = url
 			break
@@ -83,7 +83,7 @@ func HandleStatistics(w http.ResponseWriter, r *http.Request, cfgManager *config
 		Timeout: 10 * time.Second,
 	}
 
-	// Fetch statistics from the BitAxe instance
+	// Fetch statistics from the AxeOS instance
 	resp, err := client.Get(statisticsURL)
 	if err != nil {
 		log.Printf("Failed to fetch statistics for %s: %v", instanceID, err)

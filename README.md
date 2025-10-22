@@ -136,7 +136,7 @@ Without the volume mounts:
 
 ```json
 {
-  "bitaxe_dashboard_version": 3.0,
+  "axeos_dashboard_version": 3.0,
   "web_server_port": 3000,
   "title": "AxeOS Dashboard",
   "disable_authentication": false,
@@ -146,7 +146,7 @@ Without the volume mounts:
   "data_collection_enabled": true,
   "collection_interval_seconds": 300,
   "data_retention_days": 30,
-  "bitaxe_instances": [
+  "axeos_instances": [
     {"MyAxe1": "http://192.168.1.100"},
     {"MyAxe2": "http://192.168.1.101"}
   ],
@@ -154,7 +154,7 @@ Without the volume mounts:
   "mining_core_enabled": false,
   "mining_core_url": [],
   "cryptNodesEnabled": false,
-  "bitaxe_api": {
+  "axeos_api": {
     "instanceInfo": "/api/system/info",
     "instanceRestart": "/api/system/restart",
     "instanceSettings": "/api/system",
@@ -202,7 +202,7 @@ All logs follow a consistent format:
 [2025-10-22 02:35:00] [system] [main] Server running on http://localhost:3000
 [2025-10-22 02:35:07] [192.168.65.1] [middleware] Request: GET /api/systems/info
 [2025-10-22 02:35:07] [system] [service] Sending RPC request to 192.168.7.138:9001
-[2025-10-22 02:35:00] [system] [scheduler] Collected AxeOS metrics from Bitaxe1
+[2025-10-22 02:35:00] [system] [scheduler] Collected AxeOS metrics from AxeOS1
 ```
 
 ### Log Modules
@@ -379,7 +379,7 @@ AxeOS Dashboard is designed as a drop-in replacement:
 
 1. **Stop the Node.js application**
    ```bash
-   docker stop bitaxe-dashboard
+   docker stop axeos-dashboard
    ```
 
 2. **Copy your configuration files** (they're 100% compatible)
