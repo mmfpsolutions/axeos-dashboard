@@ -79,4 +79,4 @@ jobs:
           echo ""
           echo "💻 Pull and run:"
           echo "   docker pull scottwalter/axeos-dashboard:latest"
-          echo "   docker run -d -p 3000:3000 -v ./config:/app/config scottwalter/axeos-dashboard:latest"
+          echo "   docker run -d -p 3000:3000 -v ./config:/app/config -v ./data:/app/data scottwalter/axeos-dashboard:latest"

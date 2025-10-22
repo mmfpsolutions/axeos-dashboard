@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/scottwalter/axeos-dashboard/internal/logger"
 )
 
 // Config represents the application configuration
@@ -26,6 +28,13 @@ type Config struct {
 	CookieMaxAge             int                      `json:"cookie_max_age"`
 	ConfigurationOutdated    bool                     `json:"configuration_outdated"`
 	BitaxeAPI                map[string]string        `json:"bitaxe_api"`
+
+	// Data collection settings
+	DataCollectionEnabled    bool                               `json:"data_collection_enabled"`
+	CollectionIntervalSeconds int                                `json:"collection_interval_seconds"`
+	DataRetentionDays        int                                `json:"data_retention_days"`
+	RPCConfig                map[string]map[string]interface{} `json:"rpc_config,omitempty"` // RPC configuration for crypto nodes
+
 	mu                       sync.RWMutex
 }
 
@@ -34,6 +43,7 @@ type Manager struct {
 	config     *Config
 	configPath string
 	mu         sync.RWMutex
+	log        *logger.Logger
 }
 
 var (
@@ -46,6 +56,7 @@ func GetManager(configDir string) *Manager {
 	once.Do(func() {
 		instance = &Manager{
 			configPath: filepath.Join(configDir, "config.json"),
+			log:        logger.New(logger.ModuleConfig),
 		}
 	})
 	return instance
@@ -56,7 +67,7 @@ func (m *Manager) LoadConfig() (*Config, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	fmt.Printf("Loading configuration from: %s\n", m.configPath)
+	m.log.Info("Loading configuration from: %s", m.configPath)
 
 	data, err := os.ReadFile(m.configPath)
 	if err != nil {
@@ -76,15 +87,23 @@ func (m *Manager) LoadConfig() (*Config, error) {
 		config.CookieMaxAge = 3600 // 1 hour default
 	}
 
+	// Apply defaults for data collection
+	if config.CollectionIntervalSeconds == 0 {
+		config.CollectionIntervalSeconds = 300 // 5 minutes default
+	}
+	if config.DataRetentionDays == 0 {
+		config.DataRetentionDays = 30 // 30 days default
+	}
+
 	m.config = &config
-	fmt.Println("Configuration loaded successfully")
+	m.log.Info("Configuration loaded successfully")
 
 	return &config, nil
 }
 
 // ReloadConfig reloads the configuration from file
 func (m *Manager) ReloadConfig() (*Config, error) {
-	fmt.Println("Reloading configuration...")
+	m.log.Info("Reloading configuration...")
 	return m.LoadConfig()
 }
 

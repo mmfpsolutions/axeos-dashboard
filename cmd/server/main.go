@@ -1,17 +1,22 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/scottwalter/axeos-dashboard/internal/auth"
 	"github.com/scottwalter/axeos-dashboard/internal/config"
+	"github.com/scottwalter/axeos-dashboard/internal/database"
+	"github.com/scottwalter/axeos-dashboard/internal/logger"
 	"github.com/scottwalter/axeos-dashboard/internal/router"
+	"github.com/scottwalter/axeos-dashboard/internal/scheduler"
 )
 
 const (
@@ -31,14 +36,16 @@ type dynamicHandler struct {
 
 // ServeHTTP implements http.Handler interface
 func (h *dynamicHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log := logger.New(logger.ModuleMain)
+
 	// Check if we're in bootstrap mode and config files now exist
 	if h.isBootstrapMode {
 		if config.CheckConfigFilesExist(h.configDir) {
-			fmt.Println("Configuration files detected. Switching to normal mode...")
+			log.Info("Configuration files detected. Switching to normal mode...")
 
 			// Initialize JWT service
 			if err := auth.InitJWTService(h.configDir); err != nil {
-				fmt.Printf("Error initializing JWT service: %v\n", err)
+				log.Error("Error initializing JWT service: %v", err)
 				http.Error(w, "Failed to initialize authentication", http.StatusInternalServerError)
 				return
 			}
@@ -47,7 +54,7 @@ func (h *dynamicHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			h.cfgManager = config.GetManager(h.configDir)
 			cfg, err := h.cfgManager.LoadConfig()
 			if err != nil {
-				fmt.Printf("Error loading configuration: %v\n", err)
+				log.Error("Error loading configuration: %v", err)
 				http.Error(w, "Failed to load configuration", http.StatusInternalServerError)
 				return
 			}
@@ -56,7 +63,7 @@ func (h *dynamicHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			h.normalHandler = router.SetupRouter(h.cfgManager, cfg, h.configDir, h.publicDir)
 			h.isBootstrapMode = false
 
-			fmt.Println("Successfully switched to normal mode!")
+			log.Info("Successfully switched to normal mode!")
 		}
 	}
 
@@ -69,12 +76,15 @@ func (h *dynamicHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	log := logger.New(logger.ModuleMain)
 	if err := run(); err != nil {
-		log.Fatalf("FAILED TO START SERVER: %v", err)
+		log.Fatal("FAILED TO START SERVER: %v", err)
 	}
 }
 
 func run() error {
+	log := logger.New(logger.ModuleMain)
+
 	// Determine paths
 	execPath, err := os.Executable()
 	if err != nil {
@@ -89,21 +99,25 @@ func run() error {
 
 	configDir := filepath.Join(baseDir, "config")
 	publicDir := filepath.Join(baseDir, "public")
+	dataDir := filepath.Join(baseDir, "data")
 
-	fmt.Printf("Base directory: %s\n", baseDir)
-	fmt.Printf("Config directory: %s\n", configDir)
-	fmt.Printf("Public directory: %s\n", publicDir)
+	log.Info("Base directory: %s", baseDir)
+	log.Info("Config directory: %s", configDir)
+	log.Info("Public directory: %s", publicDir)
+	log.Info("Data directory: %s", dataDir)
 
 	// Check if configuration files exist
 	configFilesExist := config.CheckConfigFilesExist(configDir)
-	fmt.Printf("Config files exist: %v\n", configFilesExist)
+	log.Info("Config files exist: %v", configFilesExist)
 
 	var cfg *config.Config
 	var isBootstrapMode bool
 	var cfgManager *config.Manager
+	var dbManager *database.Manager
+	var schedManager *scheduler.Manager
 
 	if !configFilesExist {
-		fmt.Println("Configuration files missing. Starting in bootstrap mode...")
+		log.Info("Configuration files missing. Starting in bootstrap mode...")
 		isBootstrapMode = true
 		cfg = &config.Config{
 			WebServerPort: DefaultWebServerPort,
@@ -120,6 +134,26 @@ func run() error {
 		if err != nil {
 			return fmt.Errorf("failed to load configuration: %w", err)
 		}
+
+		// Initialize database if data collection is enabled
+		if cfg.DataCollectionEnabled {
+			dbManager = database.GetManager(dataDir)
+			if err := dbManager.Initialize(); err != nil {
+				return fmt.Errorf("failed to initialize database: %w", err)
+			}
+			defer dbManager.Close()
+
+			// Initialize scheduler
+			schedManager = scheduler.GetManager(dbManager, cfgManager)
+			if err := schedManager.Start(); err != nil {
+				return fmt.Errorf("failed to start scheduler: %w", err)
+			}
+			defer schedManager.Stop()
+
+			log.Info("Data collection enabled and scheduler started")
+		} else {
+			log.Info("Data collection disabled")
+		}
 	}
 
 	// Determine port
@@ -134,10 +168,10 @@ func run() error {
 
 	// Create dynamic handler that can switch from bootstrap to normal mode
 	handler := &dynamicHandler{
-		configDir:       configDir,
-		publicDir:       publicDir,
-		isBootstrapMode: isBootstrapMode,
-		cfgManager:      cfgManager,
+		configDir:        configDir,
+		publicDir:        publicDir,
+		isBootstrapMode:  isBootstrapMode,
+		cfgManager:       cfgManager,
 		bootstrapHandler: router.SetupBootstrapRouter(configDir, publicDir),
 	}
 
@@ -154,15 +188,38 @@ func run() error {
 		IdleTimeout:  60 * time.Second,
 	}
 
-	fmt.Printf("Server running on http://localhost:%d\n", port)
-	fmt.Printf("Server started at: %s\n", time.Now().Format(time.RFC3339))
-	fmt.Printf("Config directory: %s\n", configDir)
-	fmt.Printf("Public directory: %s\n", publicDir)
+	log.Info("Server running on http://localhost:%d", port)
+	log.Info("Server started at: %s", time.Now().Format(time.RFC3339))
+	log.Info("Config directory: %s", configDir)
+	log.Info("Public directory: %s", publicDir)
 
-	// Start server
-	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+	// Setup graceful shutdown
+	serverErr := make(chan error, 1)
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			serverErr <- err
+		}
+	}()
+
+	// Wait for interrupt signal
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	select {
+	case <-quit:
+		log.Info("Shutdown signal received, gracefully shutting down...")
+	case err := <-serverErr:
 		return fmt.Errorf("server error: %w", err)
 	}
 
+	// Graceful shutdown with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		return fmt.Errorf("server forced to shutdown: %w", err)
+	}
+
+	log.Info("Server stopped gracefully")
 	return nil
 }

@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/scottwalter/axeos-dashboard/internal/logger"
 )
 
 // RPCConfig represents the rpcConfig.json structure
@@ -32,6 +33,7 @@ type RPCClient struct {
 	rpcConfig *RPCConfig
 	mu        sync.RWMutex
 	client    *http.Client
+	log       *logger.Logger
 }
 
 // RPCRequest represents a JSON-RPC request
@@ -62,6 +64,7 @@ func NewRPCClient(configDir string) *RPCClient {
 		client: &http.Client{
 			Timeout: 30 * 1000000000, // 30 seconds in nanoseconds
 		},
+		log: logger.New(logger.ModuleService),
 	}
 }
 
@@ -144,7 +147,7 @@ func (r *RPCClient) CallRPC(nodeID, method string, params []interface{}) (interf
 	authEncoded := base64.StdEncoding.EncodeToString([]byte(nodeConfig.NodeRPAuth))
 	req.Header.Set("Authorization", "Basic "+authEncoded)
 
-	log.Printf("[rpcClient] Sending RPC request to %s:%d - Method: %s",
+	r.log.Info("Sending RPC request to %s:%d - Method: %s",
 		nodeConfig.NodeRPCAddress, nodeConfig.NodeRPCPort, method)
 
 	// Send request

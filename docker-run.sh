@@ -22,6 +22,12 @@ if [ ! -d "./config" ]; then
     exit 1
 fi
 
+# Create data directory if it doesn't exist
+if [ ! -d "./data" ]; then
+    echo -e "${YELLOW}Creating ./data directory for metrics storage...${NC}"
+    mkdir -p ./data
+fi
+
 # Check if required config files exist
 REQUIRED_FILES=("config.json" "access.json" "jsonWebTokenKey.json")
 MISSING_FILES=()
@@ -61,10 +67,12 @@ if docker ps -a | grep -q axeos-dashboard; then
     docker rm axeos-dashboard 2>/dev/null
 fi
 
-# Get absolute path to config directory
+# Get absolute paths to config and data directories
 CONFIG_DIR="$(cd "$(dirname "$0")/config" && pwd)"
+DATA_DIR="$(cd "$(dirname "$0")/data" && pwd)"
 
 echo -e "${GREEN}✓ Config directory: $CONFIG_DIR${NC}"
+echo -e "${GREEN}✓ Data directory: $DATA_DIR${NC}"
 
 # Run the container
 echo -e "\n${GREEN}Starting AxeOS Dashboard container...${NC}\n"
@@ -77,6 +85,7 @@ if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == 
       --name axeos-dashboard \
       -p 3000:3000 \
       -v "$CONFIG_DIR:/app/config" \
+      -v "$DATA_DIR:/app/data" \
       axeos-dashboard:latest
 else
     # Linux - use host network for better local device access
@@ -85,6 +94,7 @@ else
       --name axeos-dashboard \
       --network host \
       -v "$CONFIG_DIR:/app/config" \
+      -v "$DATA_DIR:/app/data" \
       axeos-dashboard:latest
 fi
 
