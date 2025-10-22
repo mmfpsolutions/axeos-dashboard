@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/scottwalter/axeos-dashboard/internal/database"
+	"github.com/scottwalter/axeos-dashboard/internal/services"
 )
 
 // collectAxeOSMetrics collects metrics from all configured AxeOS miners
@@ -200,23 +201,30 @@ func (m *Manager) collectSinglePoolMetric(poolName, poolURL string) error {
 
 // collectNodeMetrics collects metrics from all configured crypto nodes
 func (m *Manager) collectNodeMetrics(ctx context.Context) error {
-	cfg, err := m.cfgManager.LoadConfig()
-	if err != nil {
-		return fmt.Errorf("failed to load config: %w", err)
-	}
+	// Create RPC client to read rpcConfig.json
+	configDir := m.cfgManager.GetConfigDir()
+	rpcClient := services.NewRPCClient(configDir)
 
-	// Check if RPC config exists
-	if cfg.RPCConfig == nil {
+	// Try to load RPC config - if it fails, just return (no error)
+	if err := rpcClient.LoadConfig(); err != nil {
+		// Config file doesn't exist or can't be loaded - that's okay
 		return nil
 	}
 
-	for nodeName, nodeConfig := range cfg.RPCConfig {
+	// Get list of configured nodes
+	nodes := rpcClient.GetConfiguredNodes()
+	if len(nodes) == 0 {
+		return nil
+	}
+
+	// Collect metrics from each node
+	for _, nodeID := range nodes {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			if err := m.collectSingleNodeMetric(nodeName, nodeConfig); err != nil {
-				m.log.Error("Failed to collect node metrics from %s: %v", nodeName, err)
+			if err := m.collectSingleNodeMetric(rpcClient, nodeID); err != nil {
+				m.log.Error("Failed to collect node metrics from %s: %v", nodeID, err)
 				continue
 			}
 		}
@@ -226,28 +234,49 @@ func (m *Manager) collectNodeMetrics(ctx context.Context) error {
 }
 
 // collectSingleNodeMetric collects metrics from a single crypto node
-func (m *Manager) collectSingleNodeMetric(nodeName string, nodeConfig map[string]interface{}) error {
-	// This is a placeholder - you'll need to implement RPC calls based on your existing services/rpc.go
-	// For now, we'll create a basic structure
-
+func (m *Manager) collectSingleNodeMetric(rpcClient *services.RPCClient, nodeID string) error {
 	metric := &database.NodeMetric{
 		Timestamp: time.Now(),
-		NodeID:    nodeName,
-		NodeName:  nodeName,
+		NodeID:    nodeID,
+		NodeName:  nodeID,
 	}
 
-	// TODO: Implement actual RPC calls to fetch node metrics
-	// This should integrate with your existing internal/services/rpc.go functionality
-	// For example:
-	// - getblockchaininfo for block height, difficulty
-	// - getnetworkinfo for connections, version
-	// - getmempoolinfo for mempool stats
+	// Get blockchain info (block height, difficulty)
+	blockchainInfo, err := rpcClient.CallRPC(nodeID, "getblockchaininfo", []interface{}{})
+	if err != nil {
+		return fmt.Errorf("failed to get blockchain info: %w", err)
+	}
+
+	if blockchainInfo != nil {
+		if infoMap, ok := blockchainInfo.(map[string]interface{}); ok {
+			if blocks, ok := infoMap["blocks"].(float64); ok {
+				metric.BlockHeight = int(blocks)
+			}
+			if diff, ok := infoMap["difficulty"].(float64); ok {
+				metric.Difficulty = diff
+			}
+		}
+	}
+
+	// Get network info (connections)
+	networkInfo, err := rpcClient.CallRPC(nodeID, "getnetworkinfo", []interface{}{})
+	if err != nil {
+		return fmt.Errorf("failed to get network info: %w", err)
+	}
+
+	if networkInfo != nil {
+		if infoMap, ok := networkInfo.(map[string]interface{}); ok {
+			if connections, ok := infoMap["connections"].(float64); ok {
+				metric.Connections = int(connections)
+			}
+		}
+	}
 
 	// Insert into database
 	if err := m.dbManager.InsertNodeMetric(metric); err != nil {
 		return fmt.Errorf("failed to insert node metric: %w", err)
 	}
 
-	m.log.Info("Collected node metrics from %s", nodeName)
+	m.log.Info("Collected node metrics from %s", nodeID)
 	return nil
 }

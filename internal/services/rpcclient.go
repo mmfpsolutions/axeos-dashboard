@@ -107,6 +107,27 @@ func (r *RPCClient) getRPCConnectionDetails(nodeID string) (*RPCNodeConfig, erro
 	return nil, fmt.Errorf("node ID '%s' not found in rpcConfig.json", nodeID)
 }
 
+// LoadConfig publicly loads the RPC configuration
+func (r *RPCClient) LoadConfig() error {
+	return r.loadRPCConfig()
+}
+
+// GetConfiguredNodes returns a list of all configured node IDs
+func (r *RPCClient) GetConfiguredNodes() []string {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	if r.rpcConfig == nil {
+		return []string{}
+	}
+
+	nodeIDs := make([]string, 0, len(r.rpcConfig.CryptoNodes))
+	for _, node := range r.rpcConfig.CryptoNodes {
+		nodeIDs = append(nodeIDs, node.NodeID)
+	}
+	return nodeIDs
+}
+
 // CallRPC makes a JSON-RPC call to a cryptocurrency node
 func (r *RPCClient) CallRPC(nodeID, method string, params []interface{}) (interface{}, error) {
 	// Ensure config is loaded

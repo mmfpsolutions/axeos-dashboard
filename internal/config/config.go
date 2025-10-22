@@ -30,12 +30,14 @@ type Config struct {
 	BitaxeAPI                map[string]string        `json:"bitaxe_api"`
 
 	// Data collection settings
-	DataCollectionEnabled    bool                               `json:"data_collection_enabled"`
-	CollectionIntervalSeconds int                                `json:"collection_interval_seconds"`
-	DataRetentionDays        int                                `json:"data_retention_days"`
-	RPCConfig                map[string]map[string]interface{} `json:"rpc_config,omitempty"` // RPC configuration for crypto nodes
+	DataCollectionEnabled    bool `json:"data_collection_enabled"`
+	CollectionIntervalSeconds int  `json:"collection_interval_seconds"`
+	DataRetentionDays        int  `json:"data_retention_days"`
 
-	mu                       sync.RWMutex
+	// NOTE: RPC credentials are stored in a separate rpcConfig.json file
+	// and should NEVER be exposed through the API or stored in config.json
+
+	mu sync.RWMutex
 }
 
 // Manager handles configuration loading and hot-reloading
@@ -112,6 +114,11 @@ func (m *Manager) GetConfig() *Config {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	return m.config
+}
+
+// GetConfigDir returns the configuration directory path
+func (m *Manager) GetConfigDir() string {
+	return filepath.Dir(m.configPath)
 }
 
 // UpdateConfig updates the configuration file with new values

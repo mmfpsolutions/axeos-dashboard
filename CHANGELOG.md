@@ -12,6 +12,8 @@ All notable changes to the AxeOS Dashboard project will be documented in this fi
   - Three metric tables: `axeos_metrics`, `pool_metrics`, `node_metrics`
   - Configurable collection intervals and data retention periods
   - Volume mount at `/app/data` for metrics persistence
+  - Full node metrics collection via RPC (getblockchaininfo, getnetworkinfo)
+  - Reads node configuration from `rpcConfig.json` in config directory
 
 - **Centralized Logging System**
   - Standard log format: `[timestamp] [client_ip/system] [module] action`
@@ -24,7 +26,7 @@ All notable changes to the AxeOS Dashboard project will be documented in this fi
 - New `data_collection_enabled` field (default: `false`)
 - New `collection_interval_seconds` field (default: `300` = 5 minutes)
 - New `data_retention_days` field (default: `30` days)
-- New `rpc_config` field for cryptocurrency node RPC credentials
+- RPC credentials stored in separate `rpcConfig.json` file (NOT in config.json)
 
 ### Technical Improvements
 - Pure Go implementation (no CGO dependencies)
@@ -32,6 +34,11 @@ All notable changes to the AxeOS Dashboard project will be documented in this fi
 - Thread-safe singleton patterns for database and scheduler
 - Graceful shutdown handling for data collection tasks
 - SQLite WAL mode for better concurrent performance
+
+### Security
+- **CRITICAL**: Removed `RPCConfig` field from config struct to prevent accidental exposure
+- RPC credentials NEVER exposed through `/api/configuration` or any other API endpoint
+- Sensitive RPC authentication data isolated in separate `rpcConfig.json` file
 
 ### Documentation
 - Added comprehensive logging section to README.md
