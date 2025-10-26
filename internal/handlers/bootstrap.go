@@ -261,6 +261,9 @@ func createConfig(req BootstrapRequest) map[string]interface{} {
 		"cryptoNodes":              nil,
 		"configuration_outdated":   false,
 		"axeos_api":               nil,
+		"data_collection_enabled":    false,
+		"collection_interval_seconds": 300,
+		"data_retention_days":        30,
 	}
 
 	// Add AxeOS devices
@@ -296,10 +299,16 @@ func createConfig(req BootstrapRequest) map[string]interface{} {
 	if enableCryptoNode {
 		cfg["cryptoNodes"] = []map[string]interface{}{
 			{
-				"NodeType":  req.CryptoNodeType,
-				"NodeName":  req.CryptoNodeName,
-				"NodeId":    req.CryptoNodeId,
-				"NodeAlgo":  req.CryptoNodeAlgo,
+				"Nodes": []map[string]string{
+					{
+						"NodeType": req.CryptoNodeType,
+						"NodeName": req.CryptoNodeName,
+						"NodeId":   req.CryptoNodeId,
+						"NodeAlgo": req.CryptoNodeAlgo,
+					},
+				},
+			},
+			{
 				"NodeDisplayFields": getCryptoNodeDisplayFields(req.CryptoNodeType),
 			},
 		}
@@ -406,13 +415,10 @@ func saveRPCConfigJSON(configDir string, req BootstrapRequest) error {
 	rpcConfig := map[string]interface{}{
 		"cryptoNodes": []map[string]interface{}{
 			{
-				"type":    req.CryptoNodeType,
-				"name":    req.CryptoNodeName,
-				"algo":    req.CryptoNodeAlgo,
-				"id":      req.CryptoNodeId,
-				"rpcIp":   req.CryptoNodeRpcIp,
-				"rpcPort": rpcPort,
-				"rpcAuth": req.CryptoNodeRpcAuth,
+				"NodeId":         req.CryptoNodeId,
+				"NodeRPCAddress": req.CryptoNodeRpcIp,
+				"NodeRPCPort":    rpcPort,
+				"NodeRPAuth":     req.CryptoNodeRpcAuth,
 			},
 		},
 	}
