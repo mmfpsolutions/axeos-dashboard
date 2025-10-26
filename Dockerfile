@@ -4,6 +4,12 @@ FROM golang:1.24-alpine AS builder
 # Install build dependencies including Node.js for minification
 RUN apk add --no-cache git nodejs npm
 
+# Install minification tools early with optimized settings for ARM64 builds
+# This layer gets cached and reused across builds
+RUN npm config set fetch-timeout 300000 && \
+    npm config set fetch-retries 5 && \
+    npm install -g --no-audit --no-fund terser clean-css-cli
+
 # Set working directory
 WORKDIR /build
 
@@ -15,9 +21,6 @@ RUN go mod download
 
 # Copy source code
 COPY . .
-
-# Install minification tools
-RUN npm install -g terser clean-css-cli
 
 # Minify JavaScript files
 RUN terser public/js/clientLogin.js -o public/js/clientLogin.min.js --compress --mangle && \

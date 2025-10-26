@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const miningCoreDetailsDiv = document.getElementById('mining-core-details');
     const refreshIcon = document.getElementById('refresh-icon');
     const configIcon = document.getElementById('config-icon');
+    const compactViewIcon = document.getElementById('compact-view-icon');
 
 
     let minerData = [];
@@ -45,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let disableConfigurations=true;
     let disableAuthentication=false;
     let miningCoreEnabled=false;
+    let isCompactView=false; // Tracks the current compact view state
     // Define the ASIC Temp, VR Temp and Fan Speed progress bar color limits (green, yellow, red)
     let ASICTempMap = {
         green: 65,
@@ -73,6 +75,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (configIcon) {
         configIcon.addEventListener('click', () => {
             modalService.openConfigModal();
+        });
+    }
+
+    if (compactViewIcon) {
+        compactViewIcon.addEventListener('click', () => {
+            isCompactView = !isCompactView;
+            saveCompactViewState(isCompactView);
+
+            // Update icon appearance
+            if (isCompactView) {
+                compactViewIcon.classList.add('compact');
+            } else {
+                compactViewIcon.classList.remove('compact');
+            }
+
+            // Re-render the dashboard with new view
+            displayDashboard();
         });
     }
 
@@ -293,6 +312,30 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.warn('Failed to get section state:', error);
             return false; // Default to expanded
+        }
+    }
+
+    /**
+     * Saves the compact view state to localStorage
+     */
+    function saveCompactViewState(isCompact) {
+        try {
+            localStorage.setItem('axeos-compact-view-state', JSON.stringify(isCompact));
+        } catch (error) {
+            console.warn('Failed to save compact view state:', error);
+        }
+    }
+
+    /**
+     * Gets the saved compact view state from localStorage
+     */
+    function getCompactViewState() {
+        try {
+            const savedState = localStorage.getItem('axeos-compact-view-state');
+            return savedState ? JSON.parse(savedState) : false; // Default to full view (false)
+        } catch (error) {
+            console.warn('Failed to get compact view state:', error);
+            return false; // Default to full view
         }
     }
 
@@ -726,22 +769,41 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Add information icon (always visible)
                         allPoolsHtml += ` <img src="/public/icon/icons8-information-64-white.png" class="info-button info-icon-hover" data-instance-id="${miner.id}" title="View Detailed Information" style="width: 20px; height: 20px; margin-left: 8px; vertical-align: middle; cursor: pointer;">`;
                         allPoolsHtml += `</h4><div class="details-grid-five-columns">`;
-                        // Hash row: Hash | Expected: | Value | Current: | Value
-                        allPoolsHtml += `<div class="category-header">Hashrate</div><strong>Expected:</strong><span>${formattedExpected}</span><strong>Current:</strong><span>${formattedHashrate}</span>`;
-                        // Difficulty row: Difficulty | Best: | Value | Session: | Value
-                        allPoolsHtml += `<div class="category-header">Difficulty</div><strong>Best:</strong><span>${miner.bestDiff}</span><strong>Session:</strong><span>${miner.bestSessionDiff}</span>`;
-                        // Pool row: Pool | Diff: | Value | Shares: | Value
-                        allPoolsHtml += `<div class="category-header">Pool</div><strong>Diff:</strong><span>${miner.poolDifficulty}</span><strong>Shares:</strong><span>${miner.sharesAccepted}</span>`;
-                        //Response Time and Shares Rejected Count
-                        const formattedSharesRejected = formatFieldValue('sharesRejected', miner.sharesRejected, miner);
-                        allPoolsHtml += `<div class="category-header">Status</div><strong>Response Time:</strong><span>${miner.responseTime} ms</span><strong>Shares Rejected:</strong><span>${formattedSharesRejected}</span>`;
-                        // Temp row: Temp | ASIC: | Value | VR: | Value
-                        allPoolsHtml += `<div class="category-header">Temperature</div><strong>ASIC:</strong><span>${displayAsicTemp}</span><strong>Voltage Regulator:</strong><span>${displayVRTemp}</span>`;
-                        // Fan row: Fan | Speed: | Value | RPM: | Value
-                        allPoolsHtml += `<div class="category-header">Fan</div><strong>Speed:</strong><span>${displayFanSpeed}</span><strong>RPM:</strong><span>${miner.fanrpm}</span>`;
-                        //Uptime
-                        allPoolsHtml += `<div class="category-header">General</div><strong>Frequency:</strong><span>${miner.frequency}</span><strong>Up Time:</strong><span>${formattedUpTime}</span>`;
-                        allPoolsHtml += `<div class="category-header">Stratum</div><strong>Host:</strong><span>${miner.stratumURL}</span><strong>Port:</strong><span>${miner.stratumPort}</span>`;
+
+                        if (isCompactView) {
+                            // Compact view: Show only key fields
+                            // Current Hashrate
+                            allPoolsHtml += `<div class="category-header">Hashrate</div><strong>Current:</strong><span>${formattedHashrate}</span><div></div><div></div>`;
+                            // Difficulty Session only
+                            allPoolsHtml += `<div class="category-header">Difficulty</div><strong>Session:</strong><span>${miner.bestSessionDiff}</span><div></div><div></div>`;
+                            // Pool Shares only
+                            allPoolsHtml += `<div class="category-header">Pool</div><strong>Shares:</strong><span>${miner.sharesAccepted}</span><div></div><div></div>`;
+                            // Temp row: ASIC and VR
+                            allPoolsHtml += `<div class="category-header">Temperature</div><strong>ASIC:</strong><span>${displayAsicTemp}</span><strong>VR:</strong><span>${displayVRTemp}</span>`;
+                            // Fan Speed only
+                            allPoolsHtml += `<div class="category-header">Fan</div><strong>Speed:</strong><span>${displayFanSpeed}</span><div></div><div></div>`;
+                            // Uptime only
+                            allPoolsHtml += `<div class="category-header">General</div><strong>Up Time:</strong><span>${formattedUpTime}</span><div></div><div></div>`;
+                        } else {
+                            // Full view: Show all fields
+                            // Hash row: Hash | Expected: | Value | Current: | Value
+                            allPoolsHtml += `<div class="category-header">Hashrate</div><strong>Expected:</strong><span>${formattedExpected}</span><strong>Current:</strong><span>${formattedHashrate}</span>`;
+                            // Difficulty row: Difficulty | Best: | Value | Session: | Value
+                            allPoolsHtml += `<div class="category-header">Difficulty</div><strong>Best:</strong><span>${miner.bestDiff}</span><strong>Session:</strong><span>${miner.bestSessionDiff}</span>`;
+                            // Pool row: Pool | Diff: | Value | Shares: | Value
+                            allPoolsHtml += `<div class="category-header">Pool</div><strong>Diff:</strong><span>${miner.poolDifficulty}</span><strong>Shares:</strong><span>${miner.sharesAccepted}</span>`;
+                            //Response Time and Shares Rejected Count
+                            const formattedSharesRejected = formatFieldValue('sharesRejected', miner.sharesRejected, miner);
+                            allPoolsHtml += `<div class="category-header">Status</div><strong>Response Time:</strong><span>${miner.responseTime} ms</span><strong>Shares Rejected:</strong><span>${formattedSharesRejected}</span>`;
+                            // Temp row: Temp | ASIC: | Value | VR: | Value
+                            allPoolsHtml += `<div class="category-header">Temperature</div><strong>ASIC:</strong><span>${displayAsicTemp}</span><strong>Voltage Regulator:</strong><span>${displayVRTemp}</span>`;
+                            // Fan row: Fan | Speed: | Value | RPM: | Value
+                            allPoolsHtml += `<div class="category-header">Fan</div><strong>Speed:</strong><span>${displayFanSpeed}</span><strong>RPM:</strong><span>${miner.fanrpm}</span>`;
+                            //Uptime
+                            allPoolsHtml += `<div class="category-header">General</div><strong>Frequency:</strong><span>${miner.frequency}</span><strong>Up Time:</strong><span>${formattedUpTime}</span>`;
+                            allPoolsHtml += `<div class="category-header">Stratum</div><strong>Host:</strong><span>${miner.stratumURL}</span><strong>Port:</strong><span>${miner.stratumPort}</span>`;
+                        }
+
                         allPoolsHtml += `</div>`; // Close details-grid-five-columns for individual miner status
                         allPoolsHtml += '</div>'; // Close miner-card
                     }
@@ -783,70 +845,100 @@ document.addEventListener('DOMContentLoaded', () => {
                             allPoolsHtml += `<div class="pool-card">`; // Individual pool card wrapper
                             allPoolsHtml += `<h4><span class="status-indicator status-online" style="margin-right: 8px;"></span>${poolData.id.toUpperCase()} (${poolData.coin.symbol} - ${poolData.paymentProcessing.payoutScheme})</h4>`; // Pool specific heading
 
-                            displayFields.forEach(categoryObj => {
-                                const categoryName = Object.keys(categoryObj)[0];
-                                const fieldsArray = categoryObj[categoryName];
-
-                                // Create field data mapping for easier access
+                            if (isCompactView) {
+                                // Compact view: Show only key fields
+                                // Gather field data first
                                 const fieldData = {};
-                                fieldsArray.forEach(fieldObj => {
-                                    let fieldKey = Object.keys(fieldObj)[0];
-                                    const fieldLabel = fieldObj[fieldKey];
-
-                                    // Correct the typo from the config file for 'lasNetworkBlockTime'.
-                                    if (fieldKey === 'lasNetworkBlockTime') {
-                                        fieldKey = 'lastNetworkBlockTime';
-                                    }
-
-                                    const displayValue = getNestedMiningCoreValue(fieldKey, poolData);
-                                    const formattedValue = formatFieldValue(fieldKey, displayValue);
-                                    fieldData[fieldKey] = { label: fieldLabel, value: formattedValue };
+                                displayFields.forEach(categoryObj => {
+                                    const fieldsArray = categoryObj[Object.keys(categoryObj)[0]];
+                                    fieldsArray.forEach(fieldObj => {
+                                        let fieldKey = Object.keys(fieldObj)[0];
+                                        const fieldLabel = fieldObj[fieldKey];
+                                        if (fieldKey === 'lasNetworkBlockTime') {
+                                            fieldKey = 'lastNetworkBlockTime';
+                                        }
+                                        const displayValue = getNestedMiningCoreValue(fieldKey, poolData);
+                                        const formattedValue = formatFieldValue(fieldKey, displayValue);
+                                        fieldData[fieldKey] = { label: fieldLabel, value: formattedValue };
+                                    });
                                 });
 
-                                // Generate custom 5-column layouts based on category
-                                if (categoryName === 'Network Status') {
-                                    // Add instance name to Network Status header
-                                    allPoolsHtml += `<h4>${categoryName} - ${instanceName}</h4><div class="details-grid-five-columns">`;
-                                    // Network row
-                                    allPoolsHtml += `<div class="category-header">Network</div><strong>Difficulty:</strong><span>${fieldData.networkDifficulty?.value || 'N/A'}</span><strong>Hashrate:</strong><span>${fieldData.networkHashrate?.value || 'N/A'}</span>`;
-                                    // Block row
-                                    allPoolsHtml += `<div class="category-header">Block</div><strong>Height:</strong><span>${fieldData.blockHeight?.value || 'N/A'}</span><strong>Last Block Time:</strong><span>${fieldData.lastNetworkBlockTime?.value || 'N/A'}</span>`;
-                                    // General row
-                                    allPoolsHtml += `<div class="category-header">General</div><strong>Connected Peers:</strong><span>${fieldData.connectedPeers?.value || 'N/A'}</span><strong>Node Version:</strong><span>${fieldData.nodeVersion?.value || 'N/A'}</span>`;
-                                    allPoolsHtml += `</div>`;
-                                } else if (categoryName === 'Miner(s) Status') {
-                                    allPoolsHtml += `<h4>${categoryName}</h4><div class="details-grid-five-columns">`;
-                                    // Status row
-                                    allPoolsHtml += `<div class="category-header">Status</div><strong>Connected Miners:</strong><span>${fieldData.connectedMiners?.value || 'N/A'}</span><strong>Pool Hashrate:</strong><span>${fieldData.poolHashrate?.value || 'N/A'}</span>`;
-                                    allPoolsHtml += `</div>`;
-                                } else if (categoryName === 'Rewards' || categoryName === 'Rewards Status') {
-                                    allPoolsHtml += `<h4>${categoryName}</h4><div class="details-grid-five-columns">`;
-                                    // Total row (Paid and Blocks)
-                                    allPoolsHtml += `<div class="category-header">Total</div><strong>Paid:</strong><span>${fieldData.totalPaid?.value || 'N/A'}</span><strong>Blocks:</strong><span>${fieldData.totalBlocks?.value || 'N/A'}</span>`;
-                                    // Total row (Confirmed and Pending Blocks)
-                                    allPoolsHtml += `<div class="category-header">Total</div><strong>Confirmed Blocks:</strong><span>${fieldData.totalConfirmedBlocks?.value || 'N/A'}</span><strong>Pending Blocks:</strong><span>${fieldData.totalPendingBlocks?.value || 'N/A'}</span>`;
-                                    // Reward row
-                                    allPoolsHtml += `<div class="category-header">Reward</div><strong>Block Reward:</strong><span>${fieldData.blockReward?.value || 'N/A'}</span><strong>Pool Block Time:</strong><span>${fieldData.lastPoolBlockTime?.value || 'N/A'}</span>`;
-                                    allPoolsHtml += `</div>`;
-                                } else {
-                                    // Fallback to original layout for unknown categories
-                                    allPoolsHtml += `<h4>${categoryName}</h4><div class="details-grid">`;
+                                // Display compact view fields
+                                allPoolsHtml += `<h4>Pool Status - ${instanceName}</h4><div class="details-grid-five-columns">`;
+                                // Network Difficulty and Hashrate
+                                allPoolsHtml += `<div class="category-header">Network</div><strong>Difficulty:</strong><span>${fieldData.networkDifficulty?.value || 'N/A'}</span><strong>Hashrate:</strong><span>${fieldData.networkHashrate?.value || 'N/A'}</span>`;
+                                // Connected Peers and Pool Hashrate
+                                allPoolsHtml += `<div class="category-header">Status</div><strong>Connected Peers:</strong><span>${fieldData.connectedPeers?.value || 'N/A'}</span><strong>Pool Hashrate:</strong><span>${fieldData.poolHashrate?.value || 'N/A'}</span>`;
+                                // Confirmed Blocks
+                                allPoolsHtml += `<div class="category-header">Blocks</div><strong>Confirmed:</strong><span>${fieldData.totalConfirmedBlocks?.value || 'N/A'}</span><div></div><div></div>`;
+                                allPoolsHtml += `</div>`;
+                            } else {
+                                // Full view: Show all fields
+                                displayFields.forEach(categoryObj => {
+                                    const categoryName = Object.keys(categoryObj)[0];
+                                    const fieldsArray = categoryObj[categoryName];
+
+                                    // Create field data mapping for easier access
+                                    const fieldData = {};
                                     fieldsArray.forEach(fieldObj => {
                                         let fieldKey = Object.keys(fieldObj)[0];
                                         const fieldLabel = fieldObj[fieldKey];
 
+                                        // Correct the typo from the config file for 'lasNetworkBlockTime'.
                                         if (fieldKey === 'lasNetworkBlockTime') {
                                             fieldKey = 'lastNetworkBlockTime';
                                         }
 
                                         const displayValue = getNestedMiningCoreValue(fieldKey, poolData);
                                         const formattedValue = formatFieldValue(fieldKey, displayValue);
-
-                                        allPoolsHtml += `<strong>${fieldLabel}:</strong> <span>${formattedValue}</span>`;
+                                        fieldData[fieldKey] = { label: fieldLabel, value: formattedValue };
                                     });
-                                    allPoolsHtml += `</div>`;
-                                }
-                            });
+
+                                    // Generate custom 5-column layouts based on category
+                                    if (categoryName === 'Network Status') {
+                                        // Add instance name to Network Status header
+                                        allPoolsHtml += `<h4>${categoryName} - ${instanceName}</h4><div class="details-grid-five-columns">`;
+                                        // Network row
+                                        allPoolsHtml += `<div class="category-header">Network</div><strong>Difficulty:</strong><span>${fieldData.networkDifficulty?.value || 'N/A'}</span><strong>Hashrate:</strong><span>${fieldData.networkHashrate?.value || 'N/A'}</span>`;
+                                        // Block row
+                                        allPoolsHtml += `<div class="category-header">Block</div><strong>Height:</strong><span>${fieldData.blockHeight?.value || 'N/A'}</span><strong>Last Block Time:</strong><span>${fieldData.lastNetworkBlockTime?.value || 'N/A'}</span>`;
+                                        // General row
+                                        allPoolsHtml += `<div class="category-header">General</div><strong>Connected Peers:</strong><span>${fieldData.connectedPeers?.value || 'N/A'}</span><strong>Node Version:</strong><span>${fieldData.nodeVersion?.value || 'N/A'}</span>`;
+                                        allPoolsHtml += `</div>`;
+                                    } else if (categoryName === 'Miner(s) Status') {
+                                        allPoolsHtml += `<h4>${categoryName}</h4><div class="details-grid-five-columns">`;
+                                        // Status row
+                                        allPoolsHtml += `<div class="category-header">Status</div><strong>Connected Miners:</strong><span>${fieldData.connectedMiners?.value || 'N/A'}</span><strong>Pool Hashrate:</strong><span>${fieldData.poolHashrate?.value || 'N/A'}</span>`;
+                                        allPoolsHtml += `</div>`;
+                                    } else if (categoryName === 'Rewards' || categoryName === 'Rewards Status') {
+                                        allPoolsHtml += `<h4>${categoryName}</h4><div class="details-grid-five-columns">`;
+                                        // Total row (Paid and Blocks)
+                                        allPoolsHtml += `<div class="category-header">Total</div><strong>Paid:</strong><span>${fieldData.totalPaid?.value || 'N/A'}</span><strong>Blocks:</strong><span>${fieldData.totalBlocks?.value || 'N/A'}</span>`;
+                                        // Total row (Confirmed and Pending Blocks)
+                                        allPoolsHtml += `<div class="category-header">Total</div><strong>Confirmed Blocks:</strong><span>${fieldData.totalConfirmedBlocks?.value || 'N/A'}</span><strong>Pending Blocks:</strong><span>${fieldData.totalPendingBlocks?.value || 'N/A'}</span>`;
+                                        // Reward row
+                                        allPoolsHtml += `<div class="category-header">Reward</div><strong>Block Reward:</strong><span>${fieldData.blockReward?.value || 'N/A'}</span><strong>Pool Block Time:</strong><span>${fieldData.lastPoolBlockTime?.value || 'N/A'}</span>`;
+                                        allPoolsHtml += `</div>`;
+                                    } else {
+                                        // Fallback to original layout for unknown categories
+                                        allPoolsHtml += `<h4>${categoryName}</h4><div class="details-grid">`;
+                                        fieldsArray.forEach(fieldObj => {
+                                            let fieldKey = Object.keys(fieldObj)[0];
+                                            const fieldLabel = fieldObj[fieldKey];
+
+                                            if (fieldKey === 'lasNetworkBlockTime') {
+                                                fieldKey = 'lastNetworkBlockTime';
+                                            }
+
+                                            const displayValue = getNestedMiningCoreValue(fieldKey, poolData);
+                                            const formattedValue = formatFieldValue(fieldKey, displayValue);
+
+                                            allPoolsHtml += `<strong>${fieldLabel}:</strong> <span>${formattedValue}</span>`;
+                                        });
+                                        allPoolsHtml += `</div>`;
+                                    }
+                                });
+                            }
                             allPoolsHtml += `</div>`; // Close pool-card
                         });
                     } else if (instanceStatus === 'OK') {
@@ -917,39 +1009,73 @@ document.addEventListener('DOMContentLoaded', () => {
                 const algoText = nodeData.nodeAlgo ? ` - ${nodeData.nodeAlgo}` : '';
                 html += `<h4><span class="status-indicator status-online" style="margin-right: 8px;"></span>${nodeData.id} (${nodeData.nodeType.toUpperCase()}${algoText})</h4>`;
 
-                // Render all display fields in a single 10-column grid
-                if (nodeData.displayFields && Array.isArray(nodeData.displayFields)) {
-                    html += `<div class="details-grid-ten-columns">`;
+                if (isCompactView) {
+                    // Compact view: Show only key fields
+                    html += `<div class="details-grid-five-columns">`;
 
-                    nodeData.displayFields.forEach(categoryObj => {
-                        const categoryName = Object.keys(categoryObj)[0];
-                        const fieldsArray = categoryObj[categoryName];
+                    // Blocks and Median Time
+                    const blocks = getCryptoNodeValue('blocks', nodeData);
+                    const medianTime = getCryptoNodeValue('mediantime', nodeData);
+                    html += `<div class="category-header">Blockchain</div><strong>Blocks:</strong><span>${formatCryptoNodeValue('blocks', blocks)}</span><strong>Median Time:</strong><span>${formatCryptoNodeValue('mediantime', medianTime)}</span>`;
 
-                        // Add category header as h4 (spans full width)
-                        html += `<h4>${categoryName}</h4>`;
+                    // Difficulty - try to find the difficulty field (could be sha256d or another algo)
+                    let difficulty = getCryptoNodeValue('difficulty', nodeData);
+                    if (difficulty === 'N/A' && nodeData.nodeAlgo) {
+                        difficulty = getCryptoNodeValue(`difficulties/${nodeData.nodeAlgo}`, nodeData);
+                    }
+                    if (difficulty === 'N/A') {
+                        // Try sha256d as fallback
+                        difficulty = getCryptoNodeValue('difficulties/sha256d', nodeData);
+                    }
+                    const networkActive = getCryptoNodeValue('networkactive', nodeData);
+                    html += `<div class="category-header">Network</div><strong>Difficulty:</strong><span>${formatCryptoNodeValue('difficulty', difficulty)}</span><strong>Active:</strong><span>${formatCryptoNodeValue('networkactive', networkActive)}</span>`;
 
-                        // Process fields in groups of 5 for the ten-column layout (5 label/value pairs = 10 columns)
-                        for (let i = 0; i < fieldsArray.length; i += 5) {
-                            // Add up to 5 fields per row
-                            for (let j = 0; j < 5; j++) {
-                                const field = fieldsArray[i + j];
+                    // Connections
+                    const connections = getCryptoNodeValue('connections', nodeData);
+                    const connectionsIn = getCryptoNodeValue('connections_in', nodeData);
+                    const connectionsOut = getCryptoNodeValue('connections_out', nodeData);
+                    html += `<div class="category-header">Connections</div><strong>Total:</strong><span>${connections}</span><strong>In / Out:</strong><span>${connectionsIn} / ${connectionsOut}</span>`;
 
-                                if (field) {
-                                    const fieldKey = Object.keys(field)[0];
-                                    const fieldLabel = field[fieldKey];
-                                    const displayValue = getCryptoNodeValue(fieldKey, nodeData);
-                                    const formattedValue = formatCryptoNodeValue(fieldKey, displayValue);
+                    // Wallet Balance
+                    const balance = getCryptoNodeValue('balance', nodeData);
+                    html += `<div class="category-header">Wallet</div><strong>Balance:</strong><span>${formatCryptoNodeValue('balance', balance)}</span><div></div><div></div>`;
 
-                                    html += `<strong>${fieldLabel}:</strong><span>${formattedValue}</span>`;
-                                } else {
-                                    // Fill empty cells if we don't have 5 fields
-                                    html += `<div></div><div></div>`;
+                    html += `</div>`; // Close details-grid-five-columns
+                } else {
+                    // Full view: Render all display fields in a single 10-column grid
+                    if (nodeData.displayFields && Array.isArray(nodeData.displayFields)) {
+                        html += `<div class="details-grid-ten-columns">`;
+
+                        nodeData.displayFields.forEach(categoryObj => {
+                            const categoryName = Object.keys(categoryObj)[0];
+                            const fieldsArray = categoryObj[categoryName];
+
+                            // Add category header as h4 (spans full width)
+                            html += `<h4>${categoryName}</h4>`;
+
+                            // Process fields in groups of 5 for the ten-column layout (5 label/value pairs = 10 columns)
+                            for (let i = 0; i < fieldsArray.length; i += 5) {
+                                // Add up to 5 fields per row
+                                for (let j = 0; j < 5; j++) {
+                                    const field = fieldsArray[i + j];
+
+                                    if (field) {
+                                        const fieldKey = Object.keys(field)[0];
+                                        const fieldLabel = field[fieldKey];
+                                        const displayValue = getCryptoNodeValue(fieldKey, nodeData);
+                                        const formattedValue = formatCryptoNodeValue(fieldKey, displayValue);
+
+                                        html += `<strong>${fieldLabel}:</strong><span>${formattedValue}</span>`;
+                                    } else {
+                                        // Fill empty cells if we don't have 5 fields
+                                        html += `<div></div><div></div>`;
+                                    }
                                 }
                             }
-                        }
-                    });
+                        });
 
-                    html += `</div>`; // Close details-grid-ten-columns
+                        html += `</div>`; // Close details-grid-ten-columns
+                    }
                 }
             }
 
@@ -1213,12 +1339,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     /**
+     * Restores the saved compact view state from localStorage
+     */
+    function restoreCompactViewState() {
+        isCompactView = getCompactViewState();
+        if (compactViewIcon) {
+            if (isCompactView) {
+                compactViewIcon.classList.add('compact');
+            } else {
+                compactViewIcon.classList.remove('compact');
+            }
+        }
+    }
+
+    /**
      * Displays the mining dashboard content (formerly the summary view)
      */
     function displayDashboard() {
         // Hide/show configuration icon based on disable_configurations setting
         if (configIcon) {
             configIcon.style.display = disableConfigurations ? 'none' : 'inline-block';
+        }
+
+        // Restore compact view state on initial load
+        if (isCompactView === false && getCompactViewState() === true) {
+            restoreCompactViewState();
         }
 
         // Display the mining core summary directly in the dashboard
