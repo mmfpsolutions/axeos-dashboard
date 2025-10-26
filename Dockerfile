@@ -36,7 +36,8 @@ RUN cleancss -o public/css/axeosDashboard.min.css public/css/axeosDashboard.css 
     cleancss -o public/css/bootstrap.min.css public/css/bootstrap.css
 
 # Build the application (no CGO needed for modernc.org/sqlite)
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o axeos-dashboard ./cmd/server
+# Removed -a flag to allow build cache, removed unnecessary -installsuffix
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o axeos-dashboard ./cmd/server
 
 # Final stage
 FROM alpine:latest
